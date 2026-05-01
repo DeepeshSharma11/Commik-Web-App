@@ -4,6 +4,7 @@ from typing import List
 from app.db.supabase_client import get_supabase_service
 from app.db.async_db import db
 from app.dependencies.auth import get_current_user
+from app.routes.notifications import push_notification
 
 router = APIRouter(prefix="/orders", tags=["Orders"])
 
@@ -105,6 +106,16 @@ async def place_order(data: OrderCreate, user=Depends(get_current_user)):
         ]
 
         await db(supabase.table("order_items").insert(items_data))
+
+        # Notify customer
+        await push_notification(
+            user["id"],
+            "Order Placed ✅",
+            f"Your order of ₹{data.total_amount} has been placed. Please complete UPI payment.",
+            type_="success",
+            link="/orders"
+        )
+
         return {"message": "Order placed successfully", "order_id": order_id}
 
     except HTTPException:
@@ -159,5 +170,14 @@ async def cancel_order(order_id: str, user=Depends(get_current_user)):
 
     await db(
         supabase.table("orders").update({"status": "cancelled"}).eq("id", order_id)
+    )
+
+    # Notify customer
+    await push_notification(
+        order["customer_id"],
+        "Order Cancelled",
+        "Your order has been cancelled successfully.",
+        type_="info",
+        link="/orders"
     )
     return {"message": "Order cancelled successfully"}

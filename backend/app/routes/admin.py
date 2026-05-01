@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from app.db.supabase_client import get_supabase_service
 from app.db.async_db import db
 from app.dependencies.auth import get_current_user
+from app.routes.notifications import push_notification
 
 router = APIRouter(prefix="/admin", tags=["Admin (Malik)"])
 
@@ -194,7 +195,7 @@ async def verify_payment(order_id: str, data: PaymentVerdict, user=Depends(get_c
     """Admin verifies or rejects a submitted UTR."""
     _require_malik(user)
     supabase = get_supabase_service()
-    res = await db(supabase.table("orders").select("id, payment_status").eq("id", order_id))
+    res = await db(supabase.table("orders").select("id, payment_status, customer_id").eq("id", order_id))
     if not res.data:
         raise HTTPException(status_code=404, detail="Order not found")
     if res.data[0]["payment_status"] not in ("submitted", "pending"):
@@ -209,4 +210,25 @@ async def verify_payment(order_id: str, data: PaymentVerdict, user=Depends(get_c
         update_payload["payment_rejected_reason"] = data.reason or "Payment verification failed"
 
     await db(supabase.table("orders").update(update_payload).eq("id", order_id))
+
+    # Notify the customer
+    customer_id = res.data[0].get("customer_id")
+    if customer_id:
+        if data.verdict == "verified":
+            await push_notification(
+                customer_id,
+                "Payment Verified ✅",
+                "Your payment has been verified! Your order is now confirmed.",
+                type_="success",
+                link="/orders"
+            )
+        else:
+            await push_notification(
+                customer_id,
+                "Payment Rejected ❌",
+                f"Your payment could not be verified. Reason: {data.reason or 'Verification failed'}. Please contact support.",
+                type_="error",
+                link="/orders"
+            )
+
     return {"message": f"Payment {data.verdict}"}
