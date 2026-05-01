@@ -7,7 +7,7 @@ from app.core.config import settings
 from app.middleware.rate_limiter import limiter, IPBlockMiddleware
 from app.services.email_queue import start_worker, stop_worker
 
-from app.routes import auth, buffaloes, milk_logs, sales, admin, ai_chat, distributor, health, orders, products
+from app.routes import auth, buffaloes, milk_logs, sales, admin, ai_chat, distributor, health, orders, products, payments
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -35,6 +35,7 @@ app.include_router(distributor.router, prefix="/api/v1")
 app.include_router(health.router, prefix="/api/v1")
 app.include_router(orders.router, prefix="/api/v1")
 app.include_router(products.router, prefix="/api/v1")
+app.include_router(payments.router, prefix="/api/v1")
 
 # 1. Rate Limiting Setup
 app.state.limiter = limiter

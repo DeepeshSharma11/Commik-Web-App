@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { toast, Toaster } from 'react-hot-toast';
-import { Users, BarChart3, ShieldCheck, Mail, Phone, Calendar, ShoppingBag, TrendingUp, RefreshCw } from 'lucide-react';
+import { Users, BarChart3, ShieldCheck, Mail, Phone, Calendar, ShoppingBag, RefreshCw, Smartphone, CheckCircle2, X, Settings } from 'lucide-react';
 import { api } from '../api';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -14,21 +14,29 @@ const AdminDashboard = () => {
   const [stats, setStats]   = useState<any>(null);
   const [users, setUsers]   = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
-  const [tab, setTab]       = useState<'users' | 'orders'>('users');
+  const [payments, setPayments] = useState<any[]>([]);
+  const [payConfig, setPayConfig] = useState<any>({});
+  const [tab, setTab] = useState<'users' | 'orders' | 'payments' | 'settings'>('users');
   const [loading, setLoading] = useState(true);
   const [updatingOrder, setUpdatingOrder] = useState<string | null>(null);
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [verifying, setVerifying] = useState<string | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [statsRes, usersRes, ordersRes] = await Promise.all([
+      const [statsRes, usersRes, ordersRes, paymentsRes, payConfigRes] = await Promise.all([
         api.get('/admin/analytics'),
         api.get('/admin/users'),
         api.get('/admin/orders'),
+        api.get('/admin/payments'),
+        api.get('/admin/payment-settings'),
       ]);
       setStats(statsRes.data);
       setUsers(usersRes.data);
       setOrders(ordersRes.data);
+      setPayments(paymentsRes.data);
+      setPayConfig(payConfigRes.data || {});
     } catch {
       toast.error('Failed to load admin data');
     } finally {
@@ -79,7 +87,7 @@ const AdminDashboard = () => {
             { label: 'Total Buffaloes', value: stats?.total_buffaloes, unit: '' },
             { label: 'Milk Produced', value: stats?.total_milk_produced?.toFixed(1), unit: 'L', color: 'text-blue-300' },
             { label: 'Total Orders', value: stats?.total_orders, unit: '', color: 'text-amber-300' },
-            { label: 'Pending Orders', value: stats?.pending_orders, unit: '', color: stats?.pending_orders > 0 ? 'text-rose-400' : 'text-emerald-400' },
+            { label: 'Pending Verifications', value: stats?.pending_payment_verifications, unit: '', color: stats?.pending_payment_verifications > 0 ? 'text-rose-400' : 'text-emerald-400' },
           ].map(s => (
             <div key={s.label} className="bg-white/10 backdrop-blur-md p-5 rounded-2xl border border-white/20">
               <p className="text-blue-100 text-[10px] uppercase font-bold tracking-widest opacity-70">{s.label}</p>
@@ -103,18 +111,21 @@ const AdminDashboard = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex gap-2 border-b border-slate-200 dark:border-slate-700">
-        {(['users', 'orders'] as const).map(t => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`px-6 py-3 font-bold text-sm capitalize transition border-b-2 -mb-px ${
-              tab === t
-                ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            {t === 'users' ? <><Users size={14} className="inline mr-2" />Users ({users.length})</> : <><ShoppingBag size={14} className="inline mr-2" />Orders ({orders.length})</>}
+      <div className="flex gap-2 border-b border-slate-200 dark:border-slate-700 overflow-x-auto">
+        {([
+          ['users', 'Users', Users],
+          ['orders', 'Orders', ShoppingBag],
+          ['payments', 'Payments', Smartphone],
+          ['settings', 'Pay Settings', Settings],
+        ] as const).map(([key, label, Icon]) => (
+          <button key={key} onClick={() => setTab(key as any)}
+            className={`px-5 py-3 font-bold text-sm flex items-center gap-2 border-b-2 -mb-px whitespace-nowrap transition ${
+              tab === key ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-white'
+            }`}>
+            <Icon size={14} /> {label}
+            {key === 'payments' && stats?.pending_payment_verifications > 0 && (
+              <span className="bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{stats.pending_payment_verifications}</span>
+            )}
           </button>
         ))}
       </div>
@@ -228,6 +239,87 @@ const AdminDashboard = () => {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {/* PAYMENTS TAB */}
+      {tab === 'payments' && (
+        <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
+          <div className="px-6 py-4 border-b dark:border-slate-700 flex justify-between items-center">
+            <h3 className="font-bold flex items-center gap-2"><Smartphone className="text-blue-500" size={18} /> Payment Verifications</h3>
+            <span className="text-xs text-slate-400">{payments.filter(p => p.payment_status === 'submitted').length} pending</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead><tr className="bg-slate-50/80 dark:bg-slate-900/40 text-[10px] uppercase tracking-widest text-slate-500 font-bold">
+                <th className="px-6 py-4">Customer</th><th className="px-6 py-4">UTR</th><th className="px-6 py-4">Amount</th>
+                <th className="px-6 py-4">Status</th><th className="px-6 py-4">Submitted</th><th className="px-6 py-4">Action</th>
+              </tr></thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                {payments.map(p => (
+                  <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition">
+                    <td className="px-6 py-4"><p className="font-bold text-sm">{p.users?.full_name || '—'}</p><p className="text-xs text-slate-400">{p.users?.phone || p.users?.email}</p></td>
+                    <td className="px-6 py-4 font-mono text-sm text-blue-600">{p.payment_utr || '—'}</td>
+                    <td className="px-6 py-4 font-bold">₹{p.total_amount}</td>
+                    <td className="px-6 py-4">
+                      <span className={`text-[10px] uppercase font-black px-2 py-0.5 rounded-lg border ${
+                        p.payment_status === 'verified'  ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
+                        p.payment_status === 'submitted' ? 'bg-amber-50 border-amber-200 text-amber-700' :
+                        p.payment_status === 'rejected'  ? 'bg-rose-50 border-rose-200 text-rose-700' :
+                        'bg-slate-100 border-slate-200 text-slate-500'
+                      }`}>{p.payment_status}</span>
+                    </td>
+                    <td className="px-6 py-4 text-xs text-slate-400">{p.payment_submitted_at ? new Date(p.payment_submitted_at).toLocaleString() : '—'}</td>
+                    <td className="px-6 py-4">
+                      {p.payment_status === 'submitted' && (
+                        <div className="flex gap-2">
+                          <button disabled={verifying === p.id} onClick={async () => {
+                            setVerifying(p.id);
+                            try { await api.patch(`/admin/payments/${p.id}/verify`, { verdict: 'verified' }); toast.success('Verified!'); setPayments(prev => prev.map(x => x.id === p.id ? { ...x, payment_status: 'verified' } : x)); setStats((s: any) => s ? { ...s, pending_payment_verifications: Math.max(0, (s.pending_payment_verifications || 1) - 1) } : s); } catch { toast.error('Failed'); } finally { setVerifying(null); }
+                          }} className="flex items-center gap-1 text-xs px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg disabled:opacity-50 transition">
+                            <CheckCircle2 size={13} /> Verify
+                          </button>
+                          <button disabled={verifying === p.id} onClick={async () => {
+                            const reason = window.prompt('Rejection reason:') || 'Verification failed';
+                            setVerifying(p.id);
+                            try { await api.patch(`/admin/payments/${p.id}/verify`, { verdict: 'rejected', reason }); toast.success('Rejected'); setPayments(prev => prev.map(x => x.id === p.id ? { ...x, payment_status: 'rejected' } : x)); setStats((s: any) => s ? { ...s, pending_payment_verifications: Math.max(0, (s.pending_payment_verifications || 1) - 1) } : s); } catch { toast.error('Failed'); } finally { setVerifying(null); }
+                          }} className="flex items-center gap-1 text-xs px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg disabled:opacity-50 transition">
+                            <X size={13} /> Reject
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+                {payments.length === 0 && (<tr><td colSpan={6} className="py-12 text-center text-slate-400 italic">No payments yet.</td></tr>)}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* PAYMENT SETTINGS TAB */}
+      {tab === 'settings' && (
+        <div className="max-w-2xl bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 space-y-5">
+          <h3 className="text-xl font-bold flex items-center gap-2"><Settings className="text-blue-500" size={20} /> UPI Payment Settings</h3>
+          {([['upi_id','UPI ID','yourname@upi'],['mobile_number','Mobile Number','9999999999'],['business_name','Business Name','CommilK Dairy'],['qr_code_url','QR Code Image URL','https://...'],['instructions','Customer Instructions','Scan QR or use UPI ID to pay...']] as [string,string,string][]).map(([key, label, ph]) => (
+            <div key={key}>
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{label}</label>
+              <input type="text" value={payConfig[key] || ''} onChange={e => setPayConfig((prev: any) => ({ ...prev, [key]: e.target.value }))} placeholder={ph}
+                className="w-full p-4 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition" />
+            </div>
+          ))}
+          {payConfig.qr_code_url && (
+            <div><p className="text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">QR Preview</p><img src={payConfig.qr_code_url} alt="QR" className="w-40 h-40 object-contain border rounded-xl p-2 bg-white" onError={e => (e.currentTarget.style.display = 'none')} /></div>
+          )}
+          <button disabled={savingSettings} onClick={async () => {
+            setSavingSettings(true);
+            try { await api.put('/admin/payment-settings', payConfig); toast.success('Payment settings saved!'); }
+            catch (err: any) { toast.error(err?.response?.data?.detail || 'Failed to save'); }
+            finally { setSavingSettings(false); }
+          }} className="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-bold rounded-xl shadow-lg transition">
+            {savingSettings ? 'Saving...' : 'Save Payment Settings'}
+          </button>
         </div>
       )}
     </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ShoppingCart, Plus, Minus, CreditCard, CheckCircle2, ChevronRight, Package, Droplet, Star, MapPin, ClockIcon, X, History, AlertCircle } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, CreditCard, CheckCircle2, ChevronRight, Package, Droplet, Star, MapPin, Clock, X, History, AlertCircle, Smartphone, Copy } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
 import { api } from '../api';
 
@@ -13,7 +13,7 @@ const STATUS_STYLES: Record<string, string> = {
 const UserDashboard = () => {
   const [tab, setTab] = useState<'shop' | 'orders'>('shop');
   const [cart, setCart] = useState<{ [key: string]: number }>({});
-  const [checkoutStep, setCheckoutStep] = useState<'shop' | 'checkout' | 'success'>('shop');
+  const [checkoutStep, setCheckoutStep] = useState<'shop' | 'checkout' | 'upi' | 'success'>('shop');
   const [address, setAddress] = useState('');
   const [timeSlot, setTimeSlot] = useState('Morning (6:00 AM - 8:00 AM)');
   const [placing, setPlacing] = useState(false);
@@ -21,6 +21,12 @@ const UserDashboard = () => {
   // Products state
   const [products, setProducts] = useState<any[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
+
+  // Payment settings (UPI details from admin)
+  const [paymentSettings, setPaymentSettings] = useState<any>(null);
+  const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
+  const [utr, setUtr] = useState('');
+  const [submittingUtr, setSubmittingUtr] = useState(false);
 
   // Order history
   const [orders, setOrders] = useState<any[]>([]);
@@ -40,6 +46,7 @@ const UserDashboard = () => {
 
   useEffect(() => {
     fetchProducts();
+    api.get('/payments/settings').then(r => setPaymentSettings(r.data)).catch(() => {});
   }, [fetchProducts]);
 
   const updateQuantity = (id: string, delta: number) => {
@@ -85,21 +92,46 @@ const UserDashboard = () => {
     });
 
     setPlacing(true);
+    // Retry up to 3 times for slow internet
+    let lastErr: any;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const res = await api.post('/orders/', {
+          delivery_address: address,
+          time_slot: timeSlot,
+          total_amount: getCartTotal(),
+          items,
+        });
+        toast.success('Order created! Please complete UPI payment.');
+        setPendingOrderId(res.data.order_id);
+        setCart({});
+        setAddress('');
+        setCheckoutStep('upi');
+        setPlacing(false);
+        return;
+      } catch (err: any) {
+        lastErr = err;
+        if (attempt < 2) await new Promise(r => setTimeout(r, 1500));
+      }
+    }
+    toast.error(lastErr?.response?.data?.detail || 'Failed to place order. Check your internet.');
+    setPlacing(false);
+  };
+
+  const handleSubmitUtr = async () => {
+    if (!utr.trim() || utr.trim().length < 6) return toast.error('Enter a valid UTR/Transaction ID');
+    if (!pendingOrderId) return;
+    setSubmittingUtr(true);
     try {
-      await api.post('/orders/', {
-        delivery_address: address,
-        time_slot: timeSlot,
-        total_amount: getCartTotal(),
-        items,
-      });
-      toast.success('Order placed!');
+      await api.post('/payments/submit-utr', { order_id: pendingOrderId, utr: utr.trim() });
+      toast.success('Payment reference submitted! Admin will verify shortly.');
       setCheckoutStep('success');
-      setCart({});
-      setAddress('');
+      setPendingOrderId(null);
+      setUtr('');
     } catch (err: any) {
-      toast.error(err?.response?.data?.detail || 'Failed to place order');
+      toast.error(err?.response?.data?.detail || 'Failed to submit payment reference');
     } finally {
-      setPlacing(false);
+      setSubmittingUtr(false);
     }
   };
 
@@ -116,6 +148,98 @@ const UserDashboard = () => {
       setCancellingId(null);
     }
   };
+
+  // ── UPI PAYMENT SCREEN ───────────────────────────────────────
+  if (checkoutStep === 'upi') return (
+    <div className="min-h-[600px] flex items-center justify-center animate-in fade-in duration-300">
+      <Toaster />
+      <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl max-w-md w-full border border-slate-100 dark:border-slate-700 space-y-6">
+        <div className="text-center">
+          <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/40 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Smartphone className="text-blue-600" size={28} />
+          </div>
+          <h2 className="text-2xl font-bold">Complete Your Payment</h2>
+          <p className="text-slate-500 text-sm mt-1">Pay using UPI, then enter your transaction ID below.</p>
+        </div>
+
+        {paymentSettings ? (
+          <div className="space-y-4">
+            {/* QR Code */}
+            {paymentSettings.qr_code_url && (
+              <div className="flex justify-center">
+                <img
+                  src={paymentSettings.qr_code_url}
+                  alt="UPI QR Code"
+                  loading="lazy"
+                  className="w-48 h-48 border-4 border-blue-500 rounded-2xl object-contain bg-white p-2 shadow-lg"
+                  onError={e => (e.currentTarget.style.display = 'none')}
+                />
+              </div>
+            )}
+
+            {/* UPI ID */}
+            <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-4 border dark:border-slate-700">
+              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">UPI ID</p>
+              <div className="flex items-center justify-between gap-3">
+                <p className="font-bold text-blue-600 text-lg">{paymentSettings.upi_id}</p>
+                <button onClick={() => { navigator.clipboard.writeText(paymentSettings.upi_id); toast.success('UPI ID copied!'); }}
+                  className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg hover:bg-blue-200 transition text-blue-600">
+                  <Copy size={16} />
+                </button>
+              </div>
+            </div>
+
+            {/* Mobile */}
+            <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-4 border dark:border-slate-700">
+              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Phone / PayTM / PhonePe</p>
+              <div className="flex items-center justify-between gap-3">
+                <p className="font-bold text-slate-900 dark:text-white text-lg">{paymentSettings.mobile_number}</p>
+                <button onClick={() => { navigator.clipboard.writeText(paymentSettings.mobile_number); toast.success('Number copied!'); }}
+                  className="p-2 bg-slate-200 dark:bg-slate-700 rounded-lg hover:bg-slate-300 transition">
+                  <Copy size={16} />
+                </button>
+              </div>
+            </div>
+
+            {/* Amount */}
+            <div className="flex justify-between items-center bg-emerald-50 dark:bg-emerald-900/10 rounded-xl p-4 border border-emerald-100 dark:border-emerald-800">
+              <p className="font-semibold text-emerald-800 dark:text-emerald-300">Amount to Pay</p>
+              <p className="text-2xl font-black text-emerald-600">₹{getCartTotal() > 0 ? getCartTotal() : orders[0]?.total_amount}</p>
+            </div>
+
+            {paymentSettings.instructions && (
+              <p className="text-xs text-slate-400 text-center">{paymentSettings.instructions}</p>
+            )}
+          </div>
+        ) : (
+          <div className="text-center py-6 text-slate-400">Loading payment details...</div>
+        )}
+
+        {/* UTR Input */}
+        <div className="space-y-3">
+          <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Enter UTR / Transaction ID</label>
+          <input
+            type="text"
+            value={utr}
+            onChange={e => setUtr(e.target.value)}
+            placeholder="e.g. 123456789012"
+            className="w-full p-4 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition font-mono"
+          />
+          <button
+            onClick={handleSubmitUtr}
+            disabled={submittingUtr || !utr.trim()}
+            className="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-bold rounded-xl shadow-lg transition">
+            {submittingUtr ? 'Submitting...' : 'Confirm Payment'}
+          </button>
+          <button
+            onClick={() => setCheckoutStep('success')}
+            className="w-full py-2 text-slate-400 hover:text-slate-600 text-sm transition underline">
+            I'll submit the UTR later from My Orders
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   // ── SUCCESS SCREEN ──────────────────────────────────────────
   if (checkoutStep === 'success') return (
@@ -161,7 +285,7 @@ const UserDashboard = () => {
             </div>
             <div>
               <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-1">
-                <ClockIcon size={14} /> Delivery Time Slot
+                <Clock size={14} /> Delivery Time Slot
               </label>
               <select value={timeSlot} onChange={e => setTimeSlot(e.target.value)}
                 className="w-full p-4 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
@@ -172,10 +296,10 @@ const UserDashboard = () => {
           </form>
         </div>
 
-        {/* Payment panel */}
+        {/* Order Summary panel */}
         <div className="bg-slate-900 p-8 rounded-3xl shadow-xl text-white">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2"><CreditCard className="text-blue-400" /> Payment Summary</h2>
-          <div className="space-y-3 mb-8 max-h-[200px] overflow-y-auto pr-1">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2"><CreditCard className="text-blue-400" /> Order Summary</h2>
+          <div className="space-y-3 mb-6 max-h-[200px] overflow-y-auto pr-1">
             {Object.entries(cart).map(([id, qty]) => {
               const p = products.find(pr => pr.id === id);
               if (!p) return null;
@@ -187,18 +311,18 @@ const UserDashboard = () => {
               );
             })}
           </div>
-          <div className="border-t border-slate-700 pt-4 space-y-2 mb-8">
+          <div className="border-t border-slate-700 pt-4 space-y-2 mb-6">
             <div className="flex justify-between text-slate-400 text-sm"><span>Subtotal</span><span>₹{getCartTotal()}</span></div>
             <div className="flex justify-between text-slate-400 text-sm"><span>Delivery</span><span className="text-emerald-400 font-medium">Free</span></div>
             <div className="flex justify-between text-xl font-black text-white pt-3 border-t border-slate-700"><span>Total</span><span>₹{getCartTotal()}</span></div>
           </div>
-          <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 mb-6 flex items-start gap-3">
-            <div className="w-4 h-4 rounded-full border-4 border-blue-500 bg-slate-900 shrink-0 mt-0.5" />
-            <div><p className="font-bold text-sm">Cash on Delivery</p><p className="text-xs text-slate-400 mt-0.5">Pay when your order arrives.</p></div>
+          <div className="bg-blue-900/40 p-4 rounded-xl border border-blue-700 mb-6 flex items-start gap-3">
+            <Smartphone className="text-blue-400 shrink-0 mt-0.5" size={20} />
+            <div><p className="font-bold text-sm text-blue-200">UPI Payment</p><p className="text-xs text-blue-300/70 mt-0.5">You'll be shown your QR code & UPI ID after confirming delivery details.</p></div>
           </div>
           <button form="checkout-form" type="submit" disabled={placing}
             className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white font-bold rounded-xl shadow-lg transition">
-            {placing ? 'Placing...' : `Place Order (₹${getCartTotal()})`}
+            {placing ? 'Creating order...' : `Confirm & Pay (₹${getCartTotal()})`}
           </button>
         </div>
       </div>
