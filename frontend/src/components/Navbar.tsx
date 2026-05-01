@@ -22,13 +22,47 @@ const Navbar = () => {
   const [loadingNotifs, setLoadingNotifs] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
+  // ── Browser push notification permission ──────────────────
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  const prevUnread = useRef(0);
+
   const fetchUnread = useCallback(async () => {
     try {
       const res = await api.get('/notifications/unread-count');
-      setUnread(res.data.count);
+      const count: number = res.data.count;
+
+      // Fire a browser notification only when the count actually goes UP
+      if (
+        count > prevUnread.current &&
+        'Notification' in window &&
+        Notification.permission === 'granted'
+      ) {
+        const diff = count - prevUnread.current;
+        new Notification('CommilK 🐃', {
+          body: diff === 1 ? 'You have a new notification' : `You have ${diff} new notifications`,
+          icon: '/favicon.ico',
+          tag: 'commilk-notif', // replaces previous toast so they don't stack
+        });
+      }
+
+      prevUnread.current = count;
+      setUnread(count);
     } catch { /* silent */ }
   }, []);
 
+  // Poll every 15 seconds (faster so user sees updates quicker)
+  useEffect(() => {
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 15_000);
+    return () => clearInterval(interval);
+  }, [fetchUnread]);
+
+  // Open panel → fetch full list
   const fetchNotifications = useCallback(async () => {
     setLoadingNotifs(true);
     try {
@@ -38,14 +72,6 @@ const Navbar = () => {
     finally { setLoadingNotifs(false); }
   }, []);
 
-  // Poll unread count every 30 seconds
-  useEffect(() => {
-    fetchUnread();
-    const interval = setInterval(fetchUnread, 30_000);
-    return () => clearInterval(interval);
-  }, [fetchUnread]);
-
-  // Open panel → fetch full list
   useEffect(() => {
     if (open) fetchNotifications();
   }, [open, fetchNotifications]);
