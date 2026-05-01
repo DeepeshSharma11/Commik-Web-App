@@ -36,9 +36,10 @@
 - [x] Frontend: Dashboard with real-time buffalo count, milk yield, AI chat
 - [x] Dark/Light mode toggle (persisted via Zustand localStorage)
 - [x] Master migration SQL consolidated in `backend/db/migrations/001_master_migration.sql`
-- [x] Modular Frontend Routing: Separate Route & Page components for Malik, User, and Distributor
-- [x] Admin Dashboard: 👑 Malik Overview with global analytics
 - [x] User Dashboard: Daily Milk Log + AI Farmer Assistant
+- [x] Buffalo CRUD: Add, List, and Delete buffaloes in the UI
+- [x] Health Records: Log vaccinations, illnesses, and costs for buffaloes
+- [x] Admin Dashboard: Malik Command Center with User Directory and Global Stats
 - [x] Phase 2: Distributor Panel Full Implementation (Farmer Search + Collection Logging)
 - [ ] Phase 3: Analytics & Reporting (Charts, PDF Exports)
 

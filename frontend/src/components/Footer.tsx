@@ -1,0 +1,20 @@
+import React from 'react';
+
+const Footer = () => {
+  return (
+    <footer className="bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700 py-6 mt-auto transition-colors">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="text-slate-500 dark:text-slate-400 text-sm">
+          &copy; {new Date().getFullYear()} CommilK. All rights reserved.
+        </div>
+        <div className="flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
+          <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Privacy Policy</a>
+          <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Terms of Service</a>
+          <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Support</a>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;

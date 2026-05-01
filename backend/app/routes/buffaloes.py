@@ -63,3 +63,19 @@ async def update_buffalo(buffalo_id: str, data: BuffaloUpdate, user=Depends(get_
         return res.data[0]
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.delete("/{buffalo_id}")
+async def delete_buffalo(buffalo_id: str, user=Depends(get_current_user)):
+    supabase = get_supabase_service()
+
+    # Verify ownership
+    existing = await db(supabase.table("buffaloes").select("owner_id").eq("id", buffalo_id))
+    if not existing.data or (existing.data[0]["owner_id"] != user["id"] and user.get("role") != "malik"):
+        raise HTTPException(status_code=404, detail="Buffalo not found")
+
+    try:
+        await db(supabase.table("buffaloes").delete().eq("id", buffalo_id))
+        return {"message": "Buffalo deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))

@@ -7,6 +7,7 @@ import Layout from './layouts/Layout';
 // Pages
 import Auth from './pages/Auth';
 import ResetPassword from './pages/ResetPassword';
+import Profile from './pages/Profile';
 
 // Sub-Routes
 import UserRoutes from './routes/UserRoutes';
@@ -44,6 +45,7 @@ function App() {
                  } />
 
                  {/* Role Specific Route Modules */}
+                 <Route path="profile" element={<Profile />} />
                  <Route path="user/*" element={<UserRoutes />} />
                  
                  <Route element={<ProtectedRoute allowedRoles={['malik']} />}>
