@@ -1,12 +1,58 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, Header
+from fastapi import APIRouter, Depends, HTTPException, Request, Header, UploadFile, File
 from pydantic import BaseModel
 from typing import Optional
 from app.db.supabase_client import get_supabase_service
 from app.db.async_db import db
 from app.dependencies.auth import get_current_user
+from app.core.config import settings
 import hmac, hashlib, json
 
 router = APIRouter(prefix="/payments", tags=["Payments"])
+
+BUCKET_NAME = "commilk-assets"  # Create this bucket in Supabase Storage
+
+
+# ─── Admin: Upload QR code image to Supabase Storage ────────────────────────
+@router.post("/upload-qr")
+async def upload_qr_code(file: UploadFile = File(...), user=Depends(get_current_user)):
+    """Admin uploads a QR code image; returns its public URL."""
+    if user.get("role") != "malik":
+        raise HTTPException(status_code=403, detail="Malik access required")
+
+    allowed_types = {"image/png", "image/jpeg", "image/jpg", "image/webp"}
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Only PNG/JPEG/WebP images allowed")
+
+    contents = await file.read()
+    if len(contents) > 2 * 1024 * 1024:  # 2 MB max
+        raise HTTPException(status_code=400, detail="File too large. Max 2 MB.")
+
+    ext = file.filename.split(".")[-1].lower() if file.filename else "png"
+    file_path = f"qr-codes/payment_qr.{ext}"
+
+    supabase = get_supabase_service()
+
+    try:
+        # upsert=True overwrites existing QR file
+        supabase.storage.from_(BUCKET_NAME).upload(
+            path=file_path,
+            file=contents,
+            file_options={"content-type": file.content_type, "upsert": "true"},
+        )
+    except Exception as e:
+        # If upload fails due to existing file, try remove then re-upload
+        try:
+            supabase.storage.from_(BUCKET_NAME).remove([file_path])
+            supabase.storage.from_(BUCKET_NAME).upload(
+                path=file_path,
+                file=contents,
+                file_options={"content-type": file.content_type},
+            )
+        except Exception as e2:
+            raise HTTPException(status_code=500, detail=f"Upload failed: {str(e2)}")
+
+    public_url = f"{settings.SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{file_path}"
+    return {"url": public_url}
 
 
 # ─── Public: fetch active payment settings ──────────────────────────────────
