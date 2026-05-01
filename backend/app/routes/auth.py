@@ -11,7 +11,7 @@ from pydantic import BaseModel, EmailStr
 from app.core.config import settings
 from app.db.supabase_client import get_supabase_service
 from app.db.async_db import db
-from app.dependencies.auth import get_password_hash, verify_password, create_access_token
+from app.dependencies.auth import get_password_hash, verify_password, create_access_token, get_current_user
 from app.services.email_queue import enqueue_password_reset
 
 logger = logging.getLogger("commilk.auth")
@@ -142,3 +142,11 @@ async def reset_password(data: ResetPasswordRequest):
     )
 
     return {"message": "Password reset successfully. Please login."}
+
+@router.get("/me")
+async def get_my_profile(user=Depends(get_current_user)):
+    supabase = get_supabase_service()
+    res = await db(supabase.table("users").select("id, email, full_name, phone, village, district, avatar_url, role, created_at").eq("id", user["id"]))
+    if not res.data:
+        raise HTTPException(status_code=404, detail="User not found")
+    return res.data[0]
