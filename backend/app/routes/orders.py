@@ -133,7 +133,7 @@ async def get_my_orders(user=Depends(get_current_user)):
     supabase = get_supabase_service()
     query = (
         supabase.table("orders")
-        .select("*, order_items(*)")
+        .select("id, customer_id, delivery_address, time_slot, total_amount, status, payment_status, payment_utr, payment_verified_at, payment_rejected_reason, created_at, updated_at, order_items(id, order_id, product_id, product_name, quantity, price)")
         .order("created_at", desc=True)
         .limit(100)
     )

@@ -27,7 +27,7 @@ async def get_milk_logs(
     user=Depends(get_current_user)
 ):
     supabase = get_supabase_service()
-    query = supabase.table("milk_logs").select("*")
+    query = supabase.table("milk_logs").select("id, buffalo_id, log_date, session, qty_liters, snf_percent, fat_percent, total_qty_liters, updated_at, created_at")
 
     if user.get("role") != "malik":
         query = query.eq("logged_by", user["id"])

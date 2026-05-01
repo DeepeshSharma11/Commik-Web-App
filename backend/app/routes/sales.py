@@ -19,7 +19,7 @@ class SaleCreate(BaseModel):
 @router.get("/")
 async def get_sales(user=Depends(get_current_user)):
     supabase = get_supabase_service()
-    query = supabase.table("sales").select("*")
+    query = supabase.table("sales").select("id, amount, date, status, user_id")
     
     # Secure role-based filtering
     if user.get("role") == "user":

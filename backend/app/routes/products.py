@@ -22,7 +22,7 @@ async def get_all_products(user=Depends(get_current_user)):
     supabase = get_supabase_service()
     
     # Only active products for regular users
-    query = supabase.table("products").select("*").order("created_at")
+    query = supabase.table("products").select("id, name, description, price, unit, category, image, tag, is_active, created_at").order("created_at")
     
     if user.get("role") != "malik":
         query = query.eq("is_active", True)

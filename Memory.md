@@ -78,3 +78,6 @@ Commilk App/
 ```
 
 > **CRITICAL RULE**: Always read this `Memory.md` before making any project changes.
+- Split UserDashboard into separate pages (Home, Cart, Checkout, MyOrders, Profile, Support, PaymentIssues, BulkOrders). Centralized Cart state in cartStore.ts
+- Split AdminDashboard into separate modular pages (Overview, Users, Orders, Payments, Settings).
+- Replaced all select('*') queries with explicit column selections in backend routes.

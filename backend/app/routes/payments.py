@@ -61,7 +61,7 @@ async def get_payment_settings(user=Depends(get_current_user)):
     """Returns the active UPI payment details for the checkout page."""
     supabase = get_supabase_service()
     res = await db(
-        supabase.table("payment_settings").select("*").eq("is_active", True).limit(1)
+        supabase.table("payment_settings").select("id, upi_id, mobile_number, qr_code_url, is_active, business_name, created_at, updated_at").eq("is_active", True).limit(1)
     )
     if not res.data:
         raise HTTPException(status_code=404, detail="Payment settings not configured by admin yet.")

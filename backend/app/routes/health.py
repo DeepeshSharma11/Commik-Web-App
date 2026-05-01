@@ -24,7 +24,7 @@ async def get_health_records(buffalo_id: str, user=Depends(get_current_user)):
     if not buffalo.data or (buffalo.data[0]["owner_id"] != user["id"] and user.get("role") != "malik"):
          raise HTTPException(status_code=404, detail="Buffalo not found")
          
-    res = await db(supabase.table("health_records").select("*").eq("buffalo_id", buffalo_id).order("record_date", desc=True))
+    res = await db(supabase.table("health_records").select("id, buffalo_id, record_date, record_type, description, status, next_checkup_date, created_at").eq("buffalo_id", buffalo_id).order("record_date", desc=True))
     return res.data
 
 @router.post("/")

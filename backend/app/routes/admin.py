@@ -1,11 +1,11 @@
 import asyncio
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, EmailStr
 from typing import Optional
 from datetime import datetime, timezone
 from app.db.supabase_client import get_supabase_service
 from app.db.async_db import db
-from app.dependencies.auth import get_current_user
+from app.dependencies.auth import get_current_user, get_password_hash
 from app.routes.notifications import push_notification
 
 router = APIRouter(prefix="/admin", tags=["Admin (Malik)"])
@@ -14,6 +14,46 @@ router = APIRouter(prefix="/admin", tags=["Admin (Malik)"])
 def _require_malik(user: dict):
     if user.get("role") != "malik":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Malik access required")
+
+
+class CreateDistributorData(BaseModel):
+    full_name: str
+    email: EmailStr
+    password: str
+    phone: Optional[str] = None
+    village: Optional[str] = None
+
+    @field_validator("password")
+    @classmethod
+    def password_min_length(cls, v: str) -> str:
+        if len(v) < 6:
+            raise ValueError("Password must be at least 6 characters")
+        return v
+
+
+@router.post("/distributors", status_code=201)
+async def create_distributor(data: CreateDistributorData, user=Depends(get_current_user)):
+    """Admin creates a distributor account directly."""
+    _require_malik(user)
+    supabase = get_supabase_service()
+
+    # Check email not already taken
+    existing = await db(supabase.table("users").select("id").ilike("email", data.email))
+    if existing.data:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    hashed = await get_password_hash(data.password)
+    payload = {
+        "full_name": data.full_name,
+        "email": data.email.lower(),
+        "hashed_password": hashed,
+        "role": "distributor",
+        "phone": data.phone,
+        "village": data.village,
+    }
+    res = await db(supabase.table("users").insert(payload))
+    new_user = res.data[0]
+    return {"message": f"Distributor account created for {new_user['full_name']}", "id": new_user["id"]}
 
 
 class RoleUpdate(BaseModel):
@@ -90,7 +130,7 @@ async def get_all_orders(user=Depends(get_current_user)):
     supabase = get_supabase_service()
     res = await db(
         supabase.table("orders")
-        .select("*, order_items(*), users!orders_customer_id_fkey(full_name, email, phone)")
+        .select("id, customer_id, delivery_address, time_slot, total_amount, status, payment_status, payment_utr, payment_verified_at, payment_rejected_reason, created_at, updated_at, order_items(id, product_name, quantity, price), users!orders_customer_id_fkey(full_name, email, phone)")
         .order("created_at", desc=True)
         .limit(200)
     )
@@ -141,7 +181,7 @@ class PaymentSettingsUpdate(BaseModel):
 async def get_payment_settings_admin(user=Depends(get_current_user)):
     _require_malik(user)
     supabase = get_supabase_service()
-    res = await db(supabase.table("payment_settings").select("*").limit(1))
+    res = await db(supabase.table("payment_settings").select("id, upi_id, mobile_number, qr_code_url, is_active, business_name, created_at, updated_at").limit(1))
     return res.data[0] if res.data else {}
 
 

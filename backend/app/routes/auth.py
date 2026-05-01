@@ -65,7 +65,7 @@ async def register_user(data: UserRegister):
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     supabase = get_supabase_service()
 
-    res = await db(supabase.table("users").select("*").ilike("email", form_data.username))
+    res = await db(supabase.table("users").select("id, email, hashed_password, full_name, phone, village, district, avatar_url, role, is_active, created_at").ilike("email", form_data.username))
     if not res.data:
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
@@ -118,7 +118,7 @@ async def reset_password(data: ResetPasswordRequest):
 
     res = await db(
         supabase.table("password_reset_tokens")
-        .select("*").eq("token", data.token).eq("used", False)
+        .select("id, user_id, token, expires_at, used, created_at").eq("token", data.token).eq("used", False)
     )
     if not res.data:
         raise HTTPException(status_code=400, detail="Invalid or expired reset token")
