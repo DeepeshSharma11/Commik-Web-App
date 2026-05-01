@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
 import { Sun, Moon } from 'lucide-react';
-import { useAppStore } from '../store';
+import { useAuth, useTheme } from '../context';
 import { api } from '../api';
 import { useNavigate } from 'react-router-dom';
 
 type AuthView = 'login' | 'signup' | 'forgot';
 
 const Auth = () => {
-  const { theme, toggleTheme, setToken } = useAppStore();
+  const { setToken } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const [authView, setAuthView] = useState<AuthView>('login');
@@ -61,7 +62,7 @@ const Auth = () => {
       <Toaster />
       <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100 dark:border-slate-700">
         <div className="flex justify-between items-center mb-2">
-          <h1 className="text-3xl font-bold text-blue-700 dark:text-blue-400">🐃 CommilK</h1>
+          <h1 className="text-3xl font-bold text-emerald-700 dark:text-emerald-400">🐃 CommilK</h1>
           <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400">
             {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
           </button>
@@ -77,13 +78,13 @@ const Auth = () => {
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Your Email</label>
               <input required type="email" value={resetEmail} onChange={e => setResetEmail(e.target.value)} placeholder="your@email.com"
-                className="mt-1 w-full p-3 border dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500" />
+                className="mt-1 w-full p-3 border dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500" />
             </div>
-            <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-all shadow-md">
+            <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-lg transition-all shadow-md">
               Send Reset Link
             </button>
             <div className="text-center">
-              <button type="button" onClick={() => setAuthView('login')} className="text-blue-600 dark:text-blue-400 text-sm hover:underline">
+              <button type="button" onClick={() => setAuthView('login')} className="text-emerald-600 dark:text-emerald-400 text-sm hover:underline">
                 Back to Login
               </button>
             </div>
@@ -95,26 +96,26 @@ const Auth = () => {
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Full Name</label>
                   <input required type="text" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="e.g. Deepesh Kumar"
-                    className="mt-1 w-full p-3 border dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="mt-1 w-full p-3 border dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500" />
                 </div>
               )}
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Email</label>
                 <input required type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com"
-                  className="mt-1 w-full p-3 border dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500" />
+                  className="mt-1 w-full p-3 border dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Password</label>
                 <input required type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••"
-                  className="mt-1 w-full p-3 border dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500" />
+                  className="mt-1 w-full p-3 border dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500" />
               </div>
-              <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-all shadow-md hover:shadow-lg">
+              <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-lg transition-all shadow-md hover:shadow-lg">
                 {authView === 'login' ? 'Sign In' : 'Sign Up'}
               </button>
             </form>
 
             <div className="mt-6 text-center space-y-2">
-              <button onClick={() => setAuthView(authView === 'login' ? 'signup' : 'login')} className="text-blue-600 dark:text-blue-400 text-sm hover:underline block w-full">
+              <button onClick={() => setAuthView(authView === 'login' ? 'signup' : 'login')} className="text-emerald-600 dark:text-emerald-400 text-sm hover:underline block w-full">
                 {authView === 'login' ? "Don't have an account? Sign Up" : 'Already have an account? Sign In'}
               </button>
               {authView === 'login' && (

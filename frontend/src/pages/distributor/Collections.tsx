@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { History, RefreshCw } from 'lucide-react';
 import { api } from '../../api';
+import { PageSkeleton } from '../../components/Skeleton';
 
 const Collections = () => {
   const [collections, setCollections] = useState<any[]>([]);
@@ -18,7 +19,7 @@ const Collections = () => {
 
   useEffect(() => { fetchCollections(); }, []);
 
-  if (loading) return <div className="py-20 text-center text-blue-600 animate-pulse text-2xl">🐃</div>;
+  if (loading) return <PageSkeleton />;
 
   return (
     <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 animate-in fade-in duration-300">

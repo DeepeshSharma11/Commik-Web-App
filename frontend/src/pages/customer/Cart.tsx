@@ -3,10 +3,10 @@ import { Minus, Plus, ArrowRight, Package } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { api } from '../../api';
-import { useCartStore } from '../../cartStore';
+import { useCart } from '../../context';
 
 const Cart = () => {
-  const { items, addItem, removeItem } = useCartStore();
+  const { items, addItem, removeItem } = useCart();
   const [products, setProducts] = useState<any[]>([]);
   const navigate = useNavigate();
 
@@ -39,7 +39,7 @@ const Cart = () => {
       <div className="flex flex-col items-center justify-center min-h-[400px] text-slate-400 bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm animate-in fade-in">
         <Package size={64} className="opacity-20 mb-6" />
         <p className="text-xl font-bold text-slate-500 dark:text-slate-400 mb-6">Your cart is empty.</p>
-        <button onClick={() => navigate('/user/shop')} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition">
+        <button onClick={() => navigate('/user/shop')} className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition">
           Continue Shopping
         </button>
       </div>
@@ -59,7 +59,7 @@ const Cart = () => {
                 <img src={p.image} alt={p.name} className="w-16 h-16 rounded-xl object-cover bg-slate-100 border dark:border-slate-700" />
                 <div>
                   <h4 className="font-bold">{p.name}</h4>
-                  <p className="text-blue-600 dark:text-blue-400 font-black">₹{p.price}</p>
+                  <p className="text-emerald-600 dark:text-emerald-400 font-black">₹{p.price}</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
@@ -78,7 +78,7 @@ const Cart = () => {
             <p className="text-sm text-slate-500 font-bold uppercase tracking-wider mb-1">Total Amount</p>
             <p className="text-3xl font-black text-slate-900 dark:text-white">₹{getCartTotal()}</p>
           </div>
-          <button onClick={() => navigate('/user/checkout')} className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition flex items-center gap-2">
+          <button onClick={() => navigate('/user/checkout')} className="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition flex items-center gap-2">
             Proceed to Checkout <ArrowRight size={18} />
           </button>
         </div>

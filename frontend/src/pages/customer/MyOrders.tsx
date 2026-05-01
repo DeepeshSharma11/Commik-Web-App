@@ -3,6 +3,7 @@ import { History, Package, X, CheckCircle2, Copy } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../api';
+import { OrdersListSkeleton } from '../../components/Skeleton';
 
 const STATUS_STYLES: Record<string, string> = {
   pending:   'bg-amber-50 text-amber-700 border-amber-200',
@@ -63,7 +64,7 @@ const MyOrders = () => {
     }
   };
 
-  if (loading) return <div className="py-20 text-center animate-pulse text-slate-400 font-bold">Loading orders...</div>;
+  if (loading) return <OrdersListSkeleton count={3} />;
 
   if (orders.length === 0) return (
     <div className="flex flex-col items-center justify-center min-h-[400px] text-slate-400 bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm animate-in fade-in">

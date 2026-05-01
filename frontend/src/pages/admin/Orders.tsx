@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ShoppingBag } from 'lucide-react';
 import { api } from '../../api';
 import { toast } from 'react-hot-toast';
+import { PageSkeleton } from '../../components/Skeleton';
 
 const STATUS_COLORS: Record<string, string> = {
   pending:   'bg-amber-50 border-amber-200 text-amber-700',
@@ -42,7 +43,7 @@ const Orders = () => {
     }
   };
 
-  if (loading) return <div className="py-20 text-center text-slate-400 font-bold animate-pulse">Loading orders...</div>;
+  if (loading) return <PageSkeleton />;
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden animate-in fade-in duration-300">

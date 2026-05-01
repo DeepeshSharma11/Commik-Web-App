@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Smartphone, CheckCircle2, X } from 'lucide-react';
 import { api } from '../../api';
 import { toast } from 'react-hot-toast';
+import { PageSkeleton } from '../../components/Skeleton';
 
 const Payments = () => {
   const [payments, setPayments] = useState<any[]>([]);
@@ -22,7 +23,7 @@ const Payments = () => {
     fetchPayments();
   }, []);
 
-  if (loading) return <div className="py-20 text-center text-slate-400 font-bold animate-pulse">Loading payments...</div>;
+  if (loading) return <PageSkeleton />;
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden animate-in fade-in duration-300">

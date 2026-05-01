@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Mail, Phone, Calendar, Users as UsersIcon } from 'lucide-react';
 import { api } from '../../api';
 import { toast } from 'react-hot-toast';
+import { PageSkeleton } from '../../components/Skeleton';
 
 const Users = () => {
   const [users, setUsers] = useState<any[]>([]);
@@ -21,7 +22,7 @@ const Users = () => {
     fetchUsers();
   }, []);
 
-  if (loading) return <div className="py-20 text-center text-slate-400 font-bold animate-pulse">Loading users...</div>;
+  if (loading) return <PageSkeleton />;
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden animate-in fade-in duration-300">

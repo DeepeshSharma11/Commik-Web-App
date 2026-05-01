@@ -28,6 +28,9 @@ A production-grade multi-panel dairy management system for buffalo farmers in In
 - **Email Queue**: Async background worker with retry logic
 - **Fully Asynchronous**: High performance API via `asyncio` and thread-pool DB wrapping
 - **Dark / Light Mode**: Persisted across sessions
+- **Dynamic UI Engine**: Flexible `SectionLayout` for grids, sliders, and lists
+- **Role-Based Navigation**: Dynamic headers, hidden scrollbars, strict RBAC
+- **Multi-variant Components**: Adaptive cards that transition gracefully between grid and list modes
 
 ---
 

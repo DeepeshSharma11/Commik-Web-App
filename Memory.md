@@ -43,6 +43,10 @@
 - [x] Customer (User) Dashboard: Industry-level E-Commerce storefront for ordering milk products
 - [x] Farmer Dashboard (Isolated): Buffalo CRUD & Health Records moved to `FarmerDashboard.tsx`
 - [x] Phase 2: Distributor Panel Full Implementation (Farmer Search + Collection Logging)
+- [x] Universal SectionLayout component built for flexible rendering (grid/slider/list)
+- [x] Home Page completely refactored with Tag-based splitting (Bestsellers, Premium)
+- [x] ProductCard optimized with two variants (`detailed` vs `compact`)
+- [x] Navigation bar overhauled (Role badges updated, scrollbars hidden, AI Chat added globally)
 - [ ] Phase 3: Analytics & Reporting (Charts, PDF Exports)
 
 ## File Structure

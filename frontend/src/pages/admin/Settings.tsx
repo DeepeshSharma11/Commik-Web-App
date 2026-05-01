@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Settings as SettingsIcon, Smartphone } from 'lucide-react';
 import { api } from '../../api';
 import { toast } from 'react-hot-toast';
+import { FormSkeleton } from '../../components/Skeleton';
 
 const Settings = () => {
   const [payConfig, setPayConfig] = useState<any>({});
@@ -23,7 +24,7 @@ const Settings = () => {
     fetchSettings();
   }, []);
 
-  if (loading) return <div className="py-20 text-center text-slate-400 font-bold animate-pulse">Loading settings...</div>;
+  if (loading) return <FormSkeleton rows={4} />;
 
   return (
     <div className="max-w-2xl bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 space-y-5 animate-in fade-in duration-300">
