@@ -40,6 +40,8 @@
 - [x] Buffalo CRUD: Add, List, and Delete buffaloes in the UI
 - [x] Health Records: Log vaccinations, illnesses, and costs for buffaloes
 - [x] Admin Dashboard: Malik Command Center with User Directory and Global Stats
+- [x] Customer (User) Dashboard: Industry-level E-Commerce storefront for ordering milk products
+- [x] Farmer Dashboard (Isolated): Buffalo CRUD & Health Records moved to `FarmerDashboard.tsx`
 - [x] Phase 2: Distributor Panel Full Implementation (Farmer Search + Collection Logging)
 - [ ] Phase 3: Analytics & Reporting (Charts, PDF Exports)
 
