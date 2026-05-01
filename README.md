@@ -10,7 +10,7 @@ A production-grade multi-panel dairy management system for buffalo farmers in In
 |-------|-----------|
 | Frontend | React + Vite + TypeScript + Tailwind CSS |
 | Backend | FastAPI (Python 3.11+) |
-| Database | Supabase (PostgreSQL) |
+| Database | Supabase (PostgreSQL) — Thread-pool wrapped for full async |
 | Auth | Custom JWT (Bcrypt + python-jose) |
 | AI | Groq Llama 3.3 70B (RAG + Memory) |
 | Email | Resend API → Gmail SMTP fallback |
@@ -26,6 +26,7 @@ A production-grade multi-panel dairy management system for buffalo farmers in In
 - **AI Assistant**: RAG-powered (reads live farm data) + conversation memory
 - **Password Reset**: Resend API primary, Google SMTP fallback
 - **Email Queue**: Async background worker with retry logic
+- **Fully Asynchronous**: High performance API via `asyncio` and thread-pool DB wrapping
 - **Dark / Light Mode**: Persisted across sessions
 
 ---

@@ -8,6 +8,7 @@
 - **AI Assistant**: RAG-powered (reads live farm data) + conversation memory
 - **Password Reset**: Resend API primary, Google SMTP fallback
 - **Email Queue**: Asyncio-based background worker with retry logic
+- **Fully Asynchronous**: High performance APIs, non-blocking DB calls (`async_db.py`)
 - **Dark / Light Mode**: Persisted across sessions
 - **Panels**: 3 RBAC roles: `user` (Farmer), `distributor`, `malik` (Admin/Owner)
 - **Backend Security**: FastAPI verifies JWTs and is the **sole security gateway**. All DB access via `SUPABASE_SERVICE_ROLE_KEY`.
@@ -44,7 +45,9 @@ Commilk App/
 ├── backend/
 │   ├── app/
 │   │   ├── core/config.py         # Pydantic settings from .env
-│   │   ├── db/supabase_client.py  # Service role client
+│   │   ├── db/
+│   │   │   ├── async_db.py        # Wrapper for async DB calls
+│   │   │   └── supabase_client.py # Service role client
 │   │   ├── dependencies/auth.py   # JWT verify, bcrypt helpers
 │   │   ├── middleware/rate_limiter.py
 │   │   ├── routes/                # auth, buffaloes, milk_logs, sales, admin, ai_chat

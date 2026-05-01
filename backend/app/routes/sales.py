@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import date
 from app.db.supabase_client import get_supabase_service
+from app.db.async_db import db
 from app.dependencies.auth import get_current_user
 
 router = APIRouter(prefix="/sales", tags=["Sales"])
@@ -26,7 +27,7 @@ async def get_sales(user=Depends(get_current_user)):
     elif user.get("role") == "distributor":
         query = query.eq("distributor_id", user["id"])
         
-    res = query.execute()
+    res = await db(query)
     return res.data
 
 @router.post("/")
@@ -37,7 +38,7 @@ async def add_sale(data: SaleCreate, user=Depends(get_current_user)):
         insert_data["seller_id"] = user["id"]
         insert_data["sale_date"] = str(insert_data["sale_date"])
         
-        res = supabase.table("sales").insert(insert_data).execute()
+        res = await db(supabase.table("sales").insert(insert_data))
         return res.data[0]
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
