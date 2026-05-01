@@ -106,7 +106,7 @@ const Navbar = () => {
         {/* Notification bell + dropdown */}
         <div className="relative" ref={panelRef}>
           <button
-            onClick={() => setOpen(v => !v)}
+            onClick={() => setOpen(true)}
             className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition relative"
             aria-label="Notifications">
             <Bell size={20} />
@@ -116,56 +116,6 @@ const Navbar = () => {
               </span>
             )}
           </button>
-
-          {open && (
-            <div className="absolute right-0 top-12 w-80 sm:w-96 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150 overflow-hidden">
-              {/* Header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60">
-                <span className="font-bold text-sm flex items-center gap-2"><Bell size={14} className="text-blue-500" /> Notifications</span>
-                <div className="flex items-center gap-2">
-                  {unread > 0 && (
-                    <button onClick={markAllRead}
-                      className="text-[11px] text-blue-600 hover:underline flex items-center gap-1 font-bold">
-                      <CheckCheck size={12} /> Mark all read
-                    </button>
-                  )}
-                  <button onClick={() => setOpen(false)} className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition text-slate-400">
-                    <X size={14} />
-                  </button>
-                </div>
-              </div>
-
-              {/* List */}
-              <div className="max-h-[420px] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700">
-                {loadingNotifs ? (
-                  <div className="py-10 text-center text-slate-400 text-sm animate-pulse">Loading...</div>
-                ) : notifications.length === 0 ? (
-                  <div className="py-10 text-center text-slate-400 text-sm">
-                    <Bell size={32} className="mx-auto mb-2 opacity-30" />
-                    No notifications yet
-                  </div>
-                ) : notifications.map(n => (
-                  <div
-                    key={n.id}
-                    onClick={() => {
-                      if (!n.is_read) markRead(n.id);
-                      if (n.link) { navigate(n.link); setOpen(false); }
-                    }}
-                    className={`flex gap-3 px-4 py-3 cursor-pointer transition hover:bg-slate-50 dark:hover:bg-slate-700/40 ${!n.is_read ? 'bg-blue-50/60 dark:bg-blue-900/10' : ''}`}>
-                    <span className="text-xl shrink-0 mt-0.5">{TYPE_ICON[n.type] || 'ℹ️'}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-bold leading-tight ${!n.is_read ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400'}`}>{n.title}</p>
-                      <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{n.message}</p>
-                      <p className="text-[10px] text-slate-400 mt-1">{new Date(n.created_at).toLocaleString()}</p>
-                    </div>
-                    {!n.is_read && (
-                      <div className="w-2 h-2 bg-blue-500 rounded-full shrink-0 mt-2" />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Profile */}
@@ -184,6 +134,68 @@ const Navbar = () => {
           <LogOut size={18} /> <span className="hidden sm:inline">Logout</span>
         </button>
       </div>
+
+      {/* ── Slide-in Notifications Drawer ── */}
+      {open && (
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-slate-900/20 dark:bg-slate-900/60 backdrop-blur-sm z-50 animate-in fade-in duration-200"
+            onClick={() => setOpen(false)}
+          />
+          
+          {/* Drawer */}
+          <div className="fixed top-0 right-0 h-full w-full sm:w-96 bg-white dark:bg-slate-900 shadow-2xl z-50 flex flex-col animate-in slide-in-from-right duration-300 border-l border-slate-200 dark:border-slate-800">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
+              <span className="font-bold text-lg flex items-center gap-2"><Bell size={18} className="text-blue-500" /> Notifications</span>
+              <div className="flex items-center gap-3">
+                {unread > 0 && (
+                  <button onClick={markAllRead}
+                    className="text-xs text-blue-600 hover:underline flex items-center gap-1 font-bold bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded-lg">
+                    <CheckCheck size={14} /> Mark all read
+                  </button>
+                )}
+                <button onClick={() => setOpen(false)} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition text-slate-500">
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* List */}
+            <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800 bg-slate-50 dark:bg-slate-900/50">
+              {loadingNotifs ? (
+                <div className="py-20 text-center text-slate-400 text-sm animate-pulse">Loading...</div>
+              ) : notifications.length === 0 ? (
+                <div className="py-20 text-center text-slate-400 text-sm flex flex-col items-center justify-center">
+                  <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                    <Bell size={24} className="opacity-30" />
+                  </div>
+                  No notifications yet
+                </div>
+              ) : notifications.map(n => (
+                <div
+                  key={n.id}
+                  onClick={() => {
+                    if (!n.is_read) markRead(n.id);
+                    if (n.link) { navigate(n.link); setOpen(false); }
+                  }}
+                  className={`flex gap-4 p-5 cursor-pointer transition hover:bg-white dark:hover:bg-slate-800 ${!n.is_read ? 'bg-blue-50/50 dark:bg-blue-900/10' : 'bg-transparent'}`}>
+                  <span className="text-2xl shrink-0 mt-0.5">{TYPE_ICON[n.type] || 'ℹ️'}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-bold leading-tight mb-1 ${!n.is_read ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400'}`}>{n.title}</p>
+                    <p className="text-sm text-slate-500 leading-relaxed">{n.message}</p>
+                    <p className="text-[11px] font-medium text-slate-400 mt-2 uppercase tracking-wider">{new Date(n.created_at).toLocaleString()}</p>
+                  </div>
+                  {!n.is_read && (
+                    <div className="w-2.5 h-2.5 bg-blue-500 rounded-full shrink-0 mt-2 shadow-sm shadow-blue-500/50" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </header>
   );
 };
