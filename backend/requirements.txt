@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+supabase
+slowapi
+python-dotenv
+httpx
+bcrypt
+python-jose[cryptography]
+pydantic[email]
+python-multipart
+resend
