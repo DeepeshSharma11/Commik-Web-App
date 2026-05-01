@@ -3,29 +3,6 @@ import { ShoppingCart, Plus, Minus, CreditCard, CheckCircle2, ChevronRight, Pack
 import { toast, Toaster } from 'react-hot-toast';
 import { api } from '../api';
 
-const PRODUCTS = [
-  {
-    id: 'p1', name: 'Fresh Buffalo Milk',
-    description: '100% pure, unadulterated raw buffalo milk directly from our farm. Rich in A2 protein and fat.',
-    price: 65, unit: 'L',
-    image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&q=80&w=800',
-    tag: 'Bestseller'
-  },
-  {
-    id: 'p2', name: 'Pure Desi Ghee',
-    description: 'Traditional bilona churned ghee made from A2 buffalo milk. Perfect aroma and granular texture.',
-    price: 850, unit: 'kg',
-    image: 'https://images.unsplash.com/photo-1605296830501-c889781ce7db?auto=format&fit=crop&q=80&w=800',
-    tag: 'Premium'
-  },
-  {
-    id: 'p3', name: 'Fresh Farm Paneer',
-    description: 'Soft, creamy, and freshly prepared paneer. No preservatives or artificial softeners added.',
-    price: 320, unit: 'kg',
-    image: 'https://images.unsplash.com/photo-1631452180519-c014fe946bc0?auto=format&fit=crop&q=80&w=800'
-  },
-];
-
 const STATUS_STYLES: Record<string, string> = {
   pending:   'bg-amber-50 text-amber-700 border-amber-200',
   confirmed: 'bg-blue-50 text-blue-700 border-blue-200',
@@ -41,10 +18,29 @@ const UserDashboard = () => {
   const [timeSlot, setTimeSlot] = useState('Morning (6:00 AM - 8:00 AM)');
   const [placing, setPlacing] = useState(false);
 
+  // Products state
+  const [products, setProducts] = useState<any[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+
   // Order history
   const [orders, setOrders] = useState<any[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+
+  const fetchProducts = useCallback(async () => {
+    try {
+      const res = await api.get('/products/');
+      setProducts(res.data);
+    } catch {
+      toast.error('Failed to load products');
+    } finally {
+      setLoadingProducts(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const updateQuantity = (id: string, delta: number) => {
     setCart(prev => {
@@ -56,7 +52,7 @@ const UserDashboard = () => {
 
   const getCartTotal = () =>
     Object.entries(cart).reduce((sum, [id, qty]) => {
-      const p = PRODUCTS.find(p => p.id === id);
+      const p = products.find(p => p.id === id);
       return sum + (p ? p.price * qty : 0);
     }, 0);
 
@@ -84,7 +80,7 @@ const UserDashboard = () => {
     if (!address.trim()) return toast.error('Please provide a delivery address.');
 
     const items = Object.entries(cart).map(([id, qty]) => {
-      const p = PRODUCTS.find(pr => pr.id === id)!;
+      const p = products.find(pr => pr.id === id)!;
       return { product_id: id, product_name: p.name, quantity: qty, price: p.price };
     });
 
@@ -181,7 +177,8 @@ const UserDashboard = () => {
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2"><CreditCard className="text-blue-400" /> Payment Summary</h2>
           <div className="space-y-3 mb-8 max-h-[200px] overflow-y-auto pr-1">
             {Object.entries(cart).map(([id, qty]) => {
-              const p = PRODUCTS.find(pr => pr.id === id)!;
+              const p = products.find(pr => pr.id === id);
+              if (!p) return null;
               return (
                 <div key={id} className="flex justify-between">
                   <span className="text-slate-300">{p.name} <span className="text-slate-500 text-sm">x{qty}</span></span>
@@ -245,7 +242,13 @@ const UserDashboard = () => {
           <div className="lg:col-span-2 space-y-6">
             <h2 className="text-xl font-bold flex items-center gap-2"><Star className="text-amber-500" fill="currentColor" size={18} /> Premium Products</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {PRODUCTS.map(product => (
+              {loadingProducts ? (
+                <div className="col-span-full py-12 text-center text-blue-600 animate-pulse text-xl font-bold">
+                  Loading Products...
+                </div>
+              ) : products.length === 0 ? (
+                <div className="col-span-full py-12 text-center text-slate-400">No products available at the moment.</div>
+              ) : products.map(product => (
                 <div key={product.id} className="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl transition-all group">
                   <div className="h-48 relative overflow-hidden">
                     {product.tag && (
@@ -296,7 +299,8 @@ const UserDashboard = () => {
                 <>
                   <div className="space-y-3 max-h-[280px] overflow-y-auto pr-1 mb-5">
                     {Object.entries(cart).map(([id, qty]) => {
-                      const p = PRODUCTS.find(pr => pr.id === id)!;
+                      const p = products.find(pr => pr.id === id);
+                      if (!p) return null;
                       return (
                         <div key={id} className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700">
                           <div>
