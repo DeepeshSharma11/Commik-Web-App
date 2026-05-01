@@ -36,8 +36,10 @@
 - [x] Frontend: Dashboard with real-time buffalo count, milk yield, AI chat
 - [x] Dark/Light mode toggle (persisted via Zustand localStorage)
 - [x] Master migration SQL consolidated in `backend/db/migrations/001_master_migration.sql`
-- [x] Buffalo add/edit form on dashboard
-- [x] Phase 2: Distributor Panel
+- [x] Modular Frontend Routing: Separate Route & Page components for Malik, User, and Distributor
+- [x] Admin Dashboard: 👑 Malik Overview with global analytics
+- [x] User Dashboard: Daily Milk Log + AI Farmer Assistant
+- [ ] Phase 2: Distributor Panel Full Implementation
 
 ## File Structure
 ```
@@ -62,9 +64,13 @@ Commilk App/
 │   └── .env.example               # Template
 └── frontend/
     └── src/
-        ├── App.tsx                # Main UI (Auth + Dashboard + AI Chat)
-        ├── store.ts               # Zustand (token, theme)
-        └── api.ts                 # Axios with JWT interceptor
+        ├── components/            # ProtectedRoute, etc.
+        ├── layouts/               # Main App Layout
+        ├── pages/                 # UserDashboard, AdminDashboard, Auth
+        ├── routes/                # UserRoutes, AdminRoutes, DistributorRoutes
+        ├── App.tsx                # Main Router
+        ├── store.ts               # Zustand state
+        └── api.ts                 # Axios client
 ```
 
 > **CRITICAL RULE**: Always read this `Memory.md` before making any project changes.
