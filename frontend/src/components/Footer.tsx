@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
@@ -8,9 +9,9 @@ const Footer = () => {
           &copy; {new Date().getFullYear()} CommilK. All rights reserved.
         </div>
         <div className="flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
-          <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Privacy Policy</a>
-          <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Terms of Service</a>
-          <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Support</a>
+          <Link to="/privacy" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Privacy Policy</Link>
+          <Link to="/terms" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Terms of Service</Link>
+          <Link to="/user/support" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Support</Link>
         </div>
       </div>
     </footer>

@@ -8,6 +8,8 @@ import Layout from './layouts/Layout';
 import Auth from './pages/Auth';
 import ResetPassword from './pages/ResetPassword';
 import Profile from './pages/Profile';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
 
 // Sub-Routes
 import UserRoutes from './routes/UserRoutes';
@@ -37,6 +39,8 @@ const AppRoutes = () => {
 
                {/* Role Specific Route Modules */}
                <Route path="profile" element={<Profile />} />
+               <Route path="privacy" element={<PrivacyPolicy />} />
+               <Route path="terms" element={<TermsOfService />} />
                <Route path="user/*" element={<UserRoutes />} />
                
                <Route element={<ProtectedRoute allowedRoles={['malik']} />}>
