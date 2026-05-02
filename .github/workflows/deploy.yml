@@ -28,6 +28,7 @@ jobs:
         context: ./backend
         file: ./backend/DockerFile
         push: true
+        provenance: false
         tags: ghcr.io/deepeshsharma11/commilk-backend:latest
 
   deploy:
