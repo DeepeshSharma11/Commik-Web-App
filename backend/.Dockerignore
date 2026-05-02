@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# Git
+.git/
+.gitignore
+
+# Environment files — kabhi image mein mat daalo!
+.env
+.env.*
+!.env.example
+
+# Dev files
+*.md
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Test files
+tests/
+test/
+coverage/
+*.test.js
+*.spec.js
+
+# Logs
+*.log
+logs/
+
+# Docker files (no need to copy into container)
+Dockerfile*
+docker-compose*

@@ -1,0 +1,39 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Build Docker Image
+      run: docker build -t myapp .
+
+    - name: Run Container (test)
+      run: docker run -d -p 8000:8000 myapp
+
+    - name: Test API
+      run: curl http://localhost:8000
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Deploy (example via SSH)
+      uses: appleboy/ssh-action@v0.1.6
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.USER }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          docker pull myapp
+          docker stop myapp || true
+          docker rm myapp || true
+          docker run -d -p 8000:8000 --name myapp myapp

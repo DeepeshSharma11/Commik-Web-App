@@ -1,7 +1,6 @@
 import React, { useRef } from 'react';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
-import ProductCard from './ProductCard';
-import type { Product } from './ProductCard';
+import ProductCard, { type Product } from './ProductCard';
 
 type ViewType = 'grid' | 'slider' | 'list';
 type CardVariant = 'detailed' | 'compact';
@@ -42,8 +41,8 @@ const SectionLayout: React.FC<SectionLayoutProps> = ({
   const gridCols = cols === 4
     ? 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
     : cols === 2
-    ? 'grid-cols-1 sm:grid-cols-2'
-    : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+      ? 'grid-cols-1 sm:grid-cols-2'
+      : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
 
   if (data.length === 0) return null;
 
