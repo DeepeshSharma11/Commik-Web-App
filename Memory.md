@@ -47,6 +47,7 @@
 - [x] Home Page completely refactored with Tag-based splitting (Bestsellers, Premium)
 - [x] ProductCard optimized with two variants (`detailed` vs `compact`)
 - [x] Navigation bar overhauled (Role badges updated, scrollbars hidden, AI Chat added globally)
+- [x] Backend CI/CD pipeline setup for EC2 deployment (GHCR + Nginx)
 - [ ] Phase 3: Analytics & Reporting (Charts, PDF Exports)
 
 ## File Structure

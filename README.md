@@ -122,6 +122,16 @@ FRONTEND_URL=http://localhost:5173
 
 ---
 
+## Deployment (EC2 + GHCR)
+
+1. Set up GitHub Secrets: `SERVER_IP`, `USER`, `SSH_KEY`, `GITHUB_TOKEN`.
+2. Push to `main` branch to trigger CI/CD pipeline.
+3. The pipeline builds and pushes the image to GitHub Container Registry (GHCR).
+4. The pipeline SSHs into EC2, pulls the image, and runs it on port 8000.
+5. Setup Nginx on EC2 and use Certbot to proxy `commilk.focitech.in` to `localhost:8000`.
+
+---
+
 ## API Endpoints
 
 | Method | Endpoint | Auth | Description |
