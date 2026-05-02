@@ -185,7 +185,9 @@ const Navbar = () => {
       <div className="fixed top-0 left-0 h-full w-72 bg-white dark:bg-slate-900 shadow-2xl flex flex-col border-r border-slate-200 dark:border-slate-800" style={{ zIndex: 9997 }}>
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800 shrink-0">
-          <span className="text-lg font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">🐃 CommilK</span>
+          <span className="text-lg font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
+            <img src="/commilk_logo.png" alt="CommilK Logo" className="h-8 object-contain" />
+          </span>
           <button onClick={() => setMobileMenuOpen(false)} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition text-slate-500">
             <X size={18} />
           </button>
@@ -241,7 +243,7 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate(role === 'malik' ? '/admin' : role === 'distributor' ? '/distributor' : '/user/shop')}>
             <span className="text-xl sm:text-2xl font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
-              <span>🐃</span> <span className="hidden sm:inline">CommilK</span>
+              <img src="/commilk_logo.png" alt="CommilK Logo" className="h-8 sm:h-10 object-contain" />
             </span>
             {role !== 'user' && (
               <span className="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">
