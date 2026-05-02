@@ -43,7 +43,7 @@ const Home = () => {
         </div>
         <div className="relative z-10 max-w-2xl">
           <div className="flex items-center gap-3 mb-6">
-            <img src="/commilk_logo.png" alt="CommilK Logo" className="h-12 sm:h-16 object-contain drop-shadow-lg" />
+            <img src="/commilk_logo.png" alt="CommilK Logo" className="h-8 sm:h-12 object-contain drop-shadow-lg" />
             <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-wider">Farm to Home</span>
           </div>
           <h1 className="text-4xl sm:text-5xl font-black mb-4 leading-tight">Fresh, Pure & Unadulterated Dairy.</h1>
