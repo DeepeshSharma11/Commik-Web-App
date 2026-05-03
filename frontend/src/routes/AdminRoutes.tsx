@@ -6,6 +6,7 @@ import Orders from '../pages/admin/Orders';
 import Payments from '../pages/admin/Payments';
 import Settings from '../pages/admin/Settings';
 import CreateDistributor from '../pages/admin/CreateDistributor';
+import CreateFarmer from '../pages/admin/CreateFarmer';
 
 const AdminRoutes = () => (
   <Routes>
@@ -14,9 +15,12 @@ const AdminRoutes = () => (
     <Route path="orders" element={<Orders />} />
     <Route path="payments" element={<Payments />} />
     <Route path="create-distributor" element={<CreateDistributor />} />
-    <Route path="settings" element={<Settings />} />
-    <Route path="*" element={<Navigate to="overview" replace />} />
+    <Route path="create-farmer"      element={<CreateFarmer />} />
+    <Route path="settings"           element={<Settings />} />
+    <Route path="*"                  element={<Navigate to="overview" replace />} />
+
   </Routes>
 );
 
 export default AdminRoutes;
+

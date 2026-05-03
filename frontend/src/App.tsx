@@ -32,8 +32,9 @@ const AppRoutes = () => {
              <Routes>
                {/* Role-based Redirection for base path */}
                <Route path="" element={
-                 role === 'malik' ? <Navigate to="/admin" replace /> :
+                 role === 'malik'       ? <Navigate to="/admin" replace />       :
                  role === 'distributor' ? <Navigate to="/distributor" replace /> :
+                 role === 'farmer'      ? <Navigate to="/user/farm" replace />   :
                  <Navigate to="/user" replace />
                } />
 

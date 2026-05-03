@@ -43,11 +43,24 @@
 - [x] Customer (User) Dashboard: Industry-level E-Commerce storefront for ordering milk products
 - [x] Farmer Dashboard (Isolated): Buffalo CRUD & Health Records moved to `FarmerDashboard.tsx`
 - [x] Phase 2: Distributor Panel Full Implementation (Farmer Search + Collection Logging)
-- [x] Universal SectionLayout component built for flexible rendering (grid/slider/list)
+- [x] Distributor: Produced Milk listing page (`/distributor/produced-milk`) — lists all farmers' milk_logs.
+- [x] **Option B — Full Milk Inventory Flow**:
+  - DB: `milk_listings` (farmer stock) + `milk_orders` (fresh milk purchases) tables → `002_milk_listings.sql`
+  - Backend: `milk_listings.py` route (create, my listings, withdraw, available, all, order, my orders, all orders, update status)
+  - Farmer role: `/user/my-listings` → create listings, view stock bar, withdraw. Redirected here on login.
+  - Customer: `/user/fresh-milk` → Fresh Milk Market (card grid with stock bar, order modal)
+  - Admin: `/admin/fresh-milk-orders` → manage fresh milk orders; Overview shows inventory stats
+  - Admin analytics: total_milk_listed, total_milk_available, total_milk_listing_sold, active_listings, fresh_milk_orders, fresh_milk_revenue, fresh_milk_liters_sold
+  - Navbar: `farmer` role gets own nav (My Listings, AI Chat). Customer gets "Fresh Milk" tab. Admin gets "Fresh Milk" tab.
+- [ ] Phase 3: Analytics & Reporting (Charts, PDF Exports)
+
 - [x] Home Page completely refactored with Tag-based splitting (Bestsellers, Premium)
 - [x] ProductCard optimized with two variants (`detailed` vs `compact`)
 - [x] Navigation bar overhauled (Role badges updated, scrollbars hidden, AI Chat added globally)
 - [x] Backend CI/CD pipeline setup for EC2 deployment (GHCR + Nginx)
+- [x] **Admin Role Upgrades**: Added `POST /admin/farmers` and `POST /admin/distributors`. If user exists, their role is upgraded without losing password.
+- [x] **AI Chat Streaming**: Refactored `/ai/chat/stream` using Server-Sent Events (SSE). UI now supports real-time streaming and custom markdown rendering (zero dependency).
+- [x] **DB Query Stability**: Fixed all `select` statements across models (`buffaloes`, `milk_logs`) to perfectly match the `001_master_migration.sql` schema (removed `dob`, `session` etc).
 - [ ] Phase 3: Analytics & Reporting (Charts, PDF Exports)
 
 ## File Structure

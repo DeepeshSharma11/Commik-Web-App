@@ -82,6 +82,38 @@ async def get_collections(user=Depends(get_current_user)):
     return res.data
 
 
+@router.get("/produced-milk")
+async def get_produced_milk(
+    from_date: Optional[date] = Query(None),
+    to_date:   Optional[date] = Query(None),
+    farmer_id: Optional[str]  = Query(None, min_length=1),
+    user=Depends(get_current_user)
+):
+    """List milk production logs from all farmers. Distributor & Malik only."""
+    _require_distributor(user)
+    supabase = get_supabase_service()
+
+    query = (
+        supabase.table("milk_logs")
+        .select(
+            "id, log_date, total_qty_liters, fat_percent, snf_percent, notes, created_at,"
+            " logged_by, users!milk_logs_logged_by_fkey(full_name, village, phone)"
+        )
+        .order("log_date", desc=True)
+        .limit(300)
+    )
+
+    if farmer_id:
+        query = query.eq("logged_by", farmer_id)
+    if from_date:
+        query = query.gte("log_date", str(from_date))
+    if to_date:
+        query = query.lte("log_date", str(to_date))
+
+    res = await db(query)
+    return res.data
+
+
 @router.post("/collections")
 async def log_collection(data: CollectionCreate, user=Depends(get_current_user)):
     """Log a new milk collection from a farmer."""

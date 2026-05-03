@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { LogOut, Sun, Moon, Bell, User, CheckCheck, X, Menu, BarChart3, Users as UsersIcon, ShoppingBag, Smartphone, Settings, UserPlus, PlusCircle, History, ShoppingCart, CreditCard, Truck, Headphones, AlertTriangle, Sparkles } from 'lucide-react';
+import { LogOut, Sun, Moon, Bell, User, CheckCheck, X, Menu, BarChart3, Users as UsersIcon, ShoppingBag, Smartphone, Settings, UserPlus, PlusCircle, History, ShoppingCart, CreditCard, Truck, Headphones, AlertTriangle, Sparkles, Droplets, PackagePlus, Milk, Tractor } from 'lucide-react';
 import { useAuth, useTheme } from '../context';
 import { useNavigate, NavLink, useLocation } from 'react-router-dom';
 import { api } from '../api';
@@ -14,32 +14,45 @@ const TYPE_ICON: Record<string, string> = {
 
 // Role-specific nav items
 const NAV_ITEMS: Record<string, { to: string; icon: any; label: string }[]> = {
+  // ── Admin ──────────────────────────────────────────────────────────────
   malik: [
-    { to: '/admin/overview', icon: BarChart3, label: 'Overview' },
-    { to: '/admin/users', icon: UsersIcon, label: 'Users' },
-    { to: '/admin/orders', icon: ShoppingBag, label: 'Orders' },
-    { to: '/admin/payments', icon: Smartphone, label: 'Payments' },
-    { to: '/admin/create-distributor', icon: UserPlus, label: 'Add Distributor' },
-    { to: '/admin/settings', icon: Settings, label: 'Pay Settings' },
-    { to: '/user/ai-chat', icon: Sparkles, label: 'AI Chat' },
+    { to: '/admin/overview',           icon: BarChart3,     label: 'Overview' },
+    { to: '/admin/users',              icon: UsersIcon,     label: 'Users' },
+    { to: '/admin/orders',             icon: ShoppingBag,   label: 'Orders' },
+    { to: '/admin/payments',           icon: Smartphone,    label: 'Payments' },
+    { to: '/admin/create-distributor', icon: UserPlus,      label: 'Add Distributor' },
+    { to: '/admin/create-farmer',      icon: Tractor,       label: 'Add Farmer' },
+    { to: '/admin/settings',           icon: Settings,      label: 'Pay Settings' },
+    { to: '/user/ai-chat',             icon: Sparkles,      label: 'AI Chat' },
   ],
+  // ── Distributor (Only admin can create this account) ────────────────
   distributor: [
-    { to: '/distributor/log', icon: PlusCircle, label: 'Log Collection' },
-    { to: '/distributor/history', icon: History, label: 'History' },
-    { to: '/user/ai-chat', icon: Sparkles, label: 'AI Chat' },
+    { to: '/distributor/sell-milk',     icon: PackagePlus,  label: 'Sell Milk' },
+    { to: '/distributor/log',           icon: PlusCircle,   label: 'Log Collection' },
+    { to: '/distributor/produced-milk', icon: Droplets,     label: 'Produced Milk' },
+    { to: '/distributor/history',       icon: History,      label: 'History' },
+    { to: '/user/ai-chat',              icon: Sparkles,     label: 'AI Chat' },
   ],
+  // ── Farmer (Admin sets role=farmer) ────────────────────────────────
+  farmer: [
+    { to: '/user/farm',         icon: Tractor,      label: 'My Farm' },
+    { to: '/user/my-listings',  icon: PackagePlus,  label: 'List Milk' },
+    { to: '/user/ai-chat',      icon: Sparkles,     label: 'AI Chat' },
+    { to: '/user/profile',      icon: User,         label: 'Profile' },
+  ],
+  // ── Customer ────────────────────────────────────────────────────────
   user: [
-    { to: '/user/shop', icon: ShoppingBag, label: 'Shop' },
-    { to: '/user/cart', icon: ShoppingCart, label: 'Cart' },
-    { to: '/user/checkout', icon: CreditCard, label: 'Checkout' },
-    { to: '/user/orders', icon: History, label: 'Orders' },
-    { to: '/user/bulk', icon: Truck, label: 'Bulk' },
-    { to: '/user/support', icon: Headphones, label: 'Support' },
-    { to: '/user/payment-issues', icon: AlertTriangle, label: 'Issues' },
-    { to: '/user/ai-chat', icon: Sparkles, label: 'AI Chat' },
-    { to: '/user/profile', icon: User, label: 'Profile' },
+    { to: '/user/shop',            icon: ShoppingBag,   label: 'Shop' },
+    { to: '/user/fresh-milk',      icon: Milk,          label: 'Fresh Milk' },
+    { to: '/user/cart',            icon: ShoppingCart,  label: 'Cart' },
+    { to: '/user/orders',          icon: History,       label: 'My Orders' },
+    { to: '/user/support',         icon: Headphones,    label: 'Support' },
+    { to: '/user/ai-chat',         icon: Sparkles,      label: 'AI Chat' },
+    { to: '/user/profile',         icon: User,          label: 'Profile' },
   ],
 };
+
+
 
 const Navbar = () => {
   const { role, logout } = useAuth();

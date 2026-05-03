@@ -27,7 +27,7 @@ const CreateDistributor = () => {
         </div>
         <div>
           <h3 className="text-xl font-black">Create Distributor Account</h3>
-          <p className="text-sm text-slate-500">Set up credentials for a new distributor agent.</p>
+          <p className="text-sm text-slate-500">New account banao ya existing user ko distributor banao.</p>
         </div>
       </div>
 
@@ -69,6 +69,9 @@ const CreateDistributor = () => {
           </div>
         </div>
 
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl p-3 text-xs text-blue-700 dark:text-blue-300">
+          💡 <strong>Tip:</strong> Agar email already registered hai, user ka role automatically distributor ho jayega.
+        </div>
         <button type="submit" disabled={loading}
           className="w-full py-4 bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white font-bold rounded-xl shadow-lg transition flex items-center justify-center gap-2">
           {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <UserPlus size={18} />}

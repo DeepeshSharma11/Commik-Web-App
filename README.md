@@ -145,8 +145,11 @@ FRONTEND_URL=http://localhost:5173
 | GET | `/api/v1/milk-logs/` | JWT | Get milk logs |
 | POST | `/api/v1/milk-logs/` | JWT | Log milk |
 | GET | `/api/v1/sales/` | JWT | Get sales |
+| POST | `/api/v1/admin/distributors` | Malik | Create/Upgrade Distributor |
+| POST | `/api/v1/admin/farmers` | Malik | Create/Upgrade Farmer |
 | GET | `/api/v1/admin/analytics` | Malik | Business analytics |
-| POST | `/api/v1/ai/chat` | JWT | AI chat (RAG + memory) |
+| POST | `/api/v1/ai/chat` | JWT | AI chat (Fallback) |
+| POST | `/api/v1/ai/chat/stream` | JWT | AI chat (Real-time SSE) |
 
 ---
 

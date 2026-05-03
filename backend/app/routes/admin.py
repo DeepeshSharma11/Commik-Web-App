@@ -33,27 +33,60 @@ class CreateDistributorData(BaseModel):
 
 @router.post("/distributors", status_code=201)
 async def create_distributor(data: CreateDistributorData, user=Depends(get_current_user)):
-    """Admin creates a distributor account directly."""
+    """Admin creates OR upgrades a user to distributor role."""
     _require_malik(user)
     supabase = get_supabase_service()
+    existing = await db(supabase.table("users").select("id, full_name, role").ilike("email", data.email))
 
-    # Check email not already taken
-    existing = await db(supabase.table("users").select("id").ilike("email", data.email))
     if existing.data:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        # User exists → just upgrade their role
+        existing_user = existing.data[0]
+        await db(supabase.table("users").update({"role": "distributor"}).eq("id", existing_user["id"]))
+        return {
+            "message": f"'{existing_user['full_name']}' ka role distributor kar diya gaya (was: {existing_user['role']})",
+            "id": existing_user["id"],
+            "action": "role_upgraded",
+        }
 
+    # New user → create account
     hashed = await get_password_hash(data.password)
-    payload = {
-        "full_name": data.full_name,
-        "email": data.email.lower(),
-        "hashed_password": hashed,
-        "role": "distributor",
-        "phone": data.phone,
-        "village": data.village,
-    }
-    res = await db(supabase.table("users").insert(payload))
+    res = await db(supabase.table("users").insert({
+        "full_name": data.full_name, "email": data.email.lower(),
+        "hashed_password": hashed, "role": "distributor",
+        "phone": data.phone, "village": data.village,
+    }))
     new_user = res.data[0]
-    return {"message": f"Distributor account created for {new_user['full_name']}", "id": new_user["id"]}
+    return {"message": f"Distributor account created for {new_user['full_name']}", "id": new_user["id"], "action": "created"}
+
+
+@router.post("/farmers", status_code=201)
+async def create_farmer(data: CreateDistributorData, user=Depends(get_current_user)):
+    """Admin creates OR upgrades a user to farmer role."""
+    _require_malik(user)
+    supabase = get_supabase_service()
+    existing = await db(supabase.table("users").select("id, full_name, role").ilike("email", data.email))
+
+    if existing.data:
+        # User exists → just upgrade their role
+        existing_user = existing.data[0]
+        await db(supabase.table("users").update({"role": "farmer"}).eq("id", existing_user["id"]))
+        return {
+            "message": f"'{existing_user['full_name']}' ka role farmer kar diya gaya (was: {existing_user['role']})",
+            "id": existing_user["id"],
+            "action": "role_upgraded",
+        }
+
+    # New user → create account
+    hashed = await get_password_hash(data.password)
+    res = await db(supabase.table("users").insert({
+        "full_name": data.full_name, "email": data.email.lower(),
+        "hashed_password": hashed, "role": "farmer",
+        "phone": data.phone, "village": data.village,
+    }))
+    new_user = res.data[0]
+    return {"message": f"Farmer account created for {new_user['full_name']}", "id": new_user["id"], "action": "created"}
+
+
 
 
 class RoleUpdate(BaseModel):
@@ -92,12 +125,14 @@ async def change_user_role(user_id: str, data: RoleUpdate, user=Depends(get_curr
 async def business_analytics(user=Depends(get_current_user)):
     _require_malik(user)
     supabase = get_supabase_service()
-    buf_res, logs_res, orders_res, collections_res, users_res = await asyncio.gather(
+    buf_res, logs_res, orders_res, collections_res, users_res, listings_res, milk_orders_res = await asyncio.gather(
         db(supabase.table("buffaloes").select("id", count="exact")),
         db(supabase.table("milk_logs").select("total_qty_liters")),
         db(supabase.table("orders").select("id, total_amount, status, payment_status")),
         db(supabase.table("distributor_collections").select("amount_due")),
         db(supabase.table("users").select("id, role")),
+        db(supabase.table("milk_listings").select("quantity_liters, available_liters, status")),
+        db(supabase.table("milk_orders").select("quantity_liters, total_amount, status")),
     )
     total_milk = sum(float(log.get("total_qty_liters", 0) or 0) for log in (logs_res.data or []))
     total_orders_revenue = sum(
@@ -112,6 +147,18 @@ async def business_analytics(user=Depends(get_current_user)):
         role_counts[r] = role_counts.get(r, 0) + 1
     pending_orders = [o for o in (orders_res.data or []) if o.get("status") == "pending"]
     pending_payment = [o for o in (orders_res.data or []) if o.get("payment_status") == "submitted"]
+
+    # Milk listing inventory stats
+    total_listed       = sum(float(l.get("quantity_liters", 0) or 0) for l in (listings_res.data or []))
+    total_available    = sum(float(l.get("available_liters", 0) or 0) for l in (listings_res.data or []))
+    total_listing_sold = round(total_listed - total_available, 2)
+    active_listings    = sum(1 for l in (listings_res.data or []) if l.get("status") == "available")
+
+    # Fresh milk orders
+    fresh_milk_orders  = [o for o in (milk_orders_res.data or []) if o.get("status") != "cancelled"]
+    fresh_milk_revenue = sum(float(o.get("total_amount", 0) or 0) for o in fresh_milk_orders)
+    fresh_milk_liters  = sum(float(o.get("quantity_liters", 0) or 0) for o in fresh_milk_orders)
+
     return {
         "total_buffaloes": buf_res.count or 0,
         "total_milk_produced": round(total_milk, 2),
@@ -121,7 +168,17 @@ async def business_analytics(user=Depends(get_current_user)):
         "total_orders_revenue": round(total_orders_revenue, 2),
         "total_collections_payout": round(total_collections_payout, 2),
         "user_role_breakdown": role_counts,
+        # Inventory
+        "total_milk_listed": round(total_listed, 2),
+        "total_milk_available": round(total_available, 2),
+        "total_milk_listing_sold": total_listing_sold,
+        "active_listings": active_listings,
+        # Fresh milk orders
+        "fresh_milk_orders": len(fresh_milk_orders),
+        "fresh_milk_revenue": round(fresh_milk_revenue, 2),
+        "fresh_milk_liters_sold": round(fresh_milk_liters, 2),
     }
+
 
 
 @router.get("/orders")

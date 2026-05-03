@@ -23,7 +23,7 @@ class BuffaloUpdate(BaseModel):
 @router.get("/")
 async def list_buffaloes(user=Depends(get_current_user)):
     supabase = get_supabase_service()
-    query = supabase.table("buffaloes").select("id, owner_id, name, breed, dob, purchase_date, purchase_price, status, created_at, updated_at")
+    query = supabase.table("buffaloes").select("id, owner_id, name, tag_number, breed, status, purchase_date, purchase_price, image_url, notes, created_at")
     if user.get("role") != "malik":
         query = query.eq("owner_id", user["id"])
     res = await db(query)
