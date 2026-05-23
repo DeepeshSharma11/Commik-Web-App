@@ -1,5 +1,8 @@
 # CommilK — Buffalo Dairy Management System
 
+> [!IMPORTANT]
+> **READ `Memory.md` BEFORE MAKING ANY CHANGES.**
+
 A production-grade multi-panel dairy management system for buffalo farmers in India.
 
 ---

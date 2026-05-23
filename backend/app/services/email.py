@@ -25,7 +25,17 @@ def _send_via_resend(to_email: str, subject: str, html: str) -> bool:
         resend.Emails.send(params)
         return True
     except Exception as e:
-        logger.warning(f"[Resend] Failed: {e}")
+        error_msg = str(e)
+        logger.warning(f"[Resend] Failed with config from-email: {error_msg}")
+        # If the domain is not verified, retry with onboarding@resend.dev (for sandbox/development)
+        if "not verified" in error_msg.lower() or "verify your domain" in error_msg.lower():
+            try:
+                logger.info("[Resend] Retrying with sandbox sender 'onboarding@resend.dev'")
+                params["from"] = "CommilK <onboarding@resend.dev>"
+                resend.Emails.send(params)
+                return True
+            except Exception as retry_err:
+                logger.warning(f"[Resend] Sandbox retry failed: {retry_err}")
         return False
 
 

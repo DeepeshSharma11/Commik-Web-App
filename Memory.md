@@ -1,5 +1,8 @@
 # Project Context: CommilK (Buffalo Dairy Management System)
 
+> [!IMPORTANT]
+> **READ `Memory.md` BEFORE MAKING ANY CHANGES.**
+
 ## Core Stack
 - **Frontend**: React + Vite + TypeScript + TailwindCSS
 - **Backend**: FastAPI (Python 3.11+)
@@ -99,3 +102,6 @@ Commilk App/
 - Split UserDashboard into separate pages (Home, Cart, Checkout, MyOrders, Profile, Support, PaymentIssues, BulkOrders). Centralized Cart state in cartStore.ts
 - Split AdminDashboard into separate modular pages (Overview, Users, Orders, Payments, Settings).
 - Replaced all select('*') queries with explicit column selections in backend routes.
+- Updated email service to prioritize Resend with a smart sandbox fallback (onboarding@resend.dev) when custom domain is not verified, falling back to SMTP if both fail.
+- Updated backend CORS settings (ALLOWED_ORIGINS) and FRONTEND_URL in backend/.env to point to emilk.focitech.in.
+- Created frontend/.env.production to configure production builds with VITE_API_URL=https://commilk.focitech.in/api/v1.
