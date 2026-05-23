@@ -16,6 +16,9 @@ class BuffaloCreate(BaseModel):
 
 
 class BuffaloUpdate(BaseModel):
+    name: Optional[str] = None
+    tag_number: Optional[str] = None
+    breed: Optional[str] = None
     status: Optional[str] = None
     notes: Optional[str] = None
 

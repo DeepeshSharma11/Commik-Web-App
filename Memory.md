@@ -105,3 +105,6 @@ Commilk App/
 - Updated email service to prioritize Resend with a smart sandbox fallback (onboarding@resend.dev) when custom domain is not verified, falling back to SMTP if both fail.
 - Updated backend CORS settings (ALLOWED_ORIGINS) and FRONTEND_URL in backend/.env to point to emilk.focitech.in.
 - Created frontend/.env.production to configure production builds with VITE_API_URL=https://commilk.focitech.in/api/v1.
+- Redesigned Auth page to split-screen layout with visual features showcase and polished input styling.
+- Overhauled Farmer Dashboard with responsive CSS weekly yield trend chart, breed breakdown analytics, ear-tag styled cattle cards, and edit buffalo capabilities (supported by extending backend BuffaloUpdate model).
+- Upgraded Farmer AI Chat to support smooth SSE real-time streaming with markdown rendering.

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, Sparkles, Tractor, ShieldCheck, Milk } from 'lucide-react';
 import { useAuth, useTheme } from '../context';
 import { api } from '../api';
 import { useNavigate } from 'react-router-dom';
@@ -29,7 +29,7 @@ const Auth = () => {
       toast.success('Welcome back!');
       navigate('/');
     } catch {
-      toast.error('Invalid email or password');
+      toast.error('Invalid email or password. Please try again.');
     }
   };
 
@@ -37,11 +37,11 @@ const Auth = () => {
     e.preventDefault();
     try {
       await api.post('/auth/register', { email, password, full_name: fullName });
-      toast.success('Account created! Please login.');
+      toast.success('Account created successfully! Please sign in.');
       setAuthView('login');
       setPassword('');
     } catch (err: any) {
-      toast.error(err.response?.data?.detail || 'Registration failed');
+      toast.error(err.response?.data?.detail || 'Registration failed. Try again.');
     }
   };
 
@@ -49,83 +49,187 @@ const Auth = () => {
     e.preventDefault();
     try {
       await api.post('/auth/forgot-password', { email: resetEmail });
-      toast.success('Reset link sent! Check your email.');
+      toast.success('We sent a reset link to your email.');
       setAuthView('login');
       setResetEmail('');
     } catch {
-      toast.error('Something went wrong. Try again.');
+      toast.error('Something went wrong. Please check your email and try again.');
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 transition-colors">
+    <div className="min-h-screen flex bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
       <Toaster />
-      <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100 dark:border-slate-700">
-        <div className="flex justify-between items-center mb-2">
-          <h1 className="text-3xl font-bold text-emerald-700 dark:text-emerald-400">🐃 CommilK</h1>
-          <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400">
-            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
+      
+      {/* Left Pane: Beautiful Feature Showcase (Visible on Large Screens) */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-emerald-600 via-teal-700 to-cyan-900 items-center justify-center p-12 text-white overflow-hidden">
+        {/* Abstract Glow Effects */}
+        <div className="absolute top-0 left-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-y-1/2 -translate-x-1/3"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-teal-500/20 rounded-full blur-3xl translate-y-1/3 translate-x-1/3"></div>
+        
+        <div className="relative z-10 max-w-lg space-y-10">
+          <div className="flex items-center gap-3">
+            <span className="text-4xl">🐃</span>
+            <span className="text-3xl font-black tracking-wider bg-clip-text bg-gradient-to-r from-white to-emerald-200">CommilK</span>
+          </div>
+
+          <div className="space-y-2">
+            <h2 className="text-4xl font-extrabold leading-tight">Your Digital Dairy Farm Assistant.</h2>
+            <p className="text-emerald-100/90 text-lg">Pure milk tracking, smart animal management, and AI guidance — all in one simple tool.</p>
+          </div>
+
+          {/* Features Checklist */}
+          <div className="space-y-6">
+            <div className="flex items-start gap-4">
+              <div className="p-2 bg-white/10 rounded-xl mt-1">
+                <Tractor size={20} className="text-emerald-300" />
+              </div>
+              <div>
+                <h4 className="font-bold text-white">Manage Your Herd</h4>
+                <p className="text-sm text-emerald-100/80">Register buffaloes, assign ear tags, and monitor health easily.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <div className="p-2 bg-white/10 rounded-xl mt-1">
+                <Milk size={20} className="text-emerald-300" />
+              </div>
+              <div>
+                <h4 className="font-bold text-white">Log Milk Everyday</h4>
+                <p className="text-sm text-emerald-100/80">Track morning and evening milk yield in real-time.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <div className="p-2 bg-white/10 rounded-xl mt-1">
+                <Sparkles size={20} className="text-emerald-300" />
+              </div>
+              <div>
+                <h4 className="font-bold text-white">Ask CommilK AI</h4>
+                <p className="text-sm text-emerald-100/80">Talk to our AI helper to get tips on feed, illness, and milk yield.</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-6 border-t border-white/10 flex items-center gap-2 text-xs text-emerald-200/70">
+            <ShieldCheck size={14} /> Encrypted · Farm-Safe Data
+          </div>
         </div>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
-          {authView === 'login' && 'Welcome back, Farmer!'}
-          {authView === 'signup' && 'Create your farm account'}
-          {authView === 'forgot' && 'Reset your password'}
-        </p>
+      </div>
 
-        {authView === 'forgot' ? (
-          <form onSubmit={handleForgotPassword} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Your Email</label>
-              <input required type="email" value={resetEmail} onChange={e => setResetEmail(e.target.value)} placeholder="your@email.com"
-                className="mt-1 w-full p-3 border dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500" />
-            </div>
-            <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-lg transition-all shadow-md">
-              Send Reset Link
-            </button>
-            <div className="text-center">
-              <button type="button" onClick={() => setAuthView('login')} className="text-emerald-600 dark:text-emerald-400 text-sm hover:underline">
-                Back to Login
-              </button>
-            </div>
-          </form>
-        ) : (
-          <>
-            <form onSubmit={authView === 'login' ? handleLogin : handleRegister} className="space-y-4">
-              {authView === 'signup' && (
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Full Name</label>
-                  <input required type="text" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="e.g. Deepesh Kumar"
-                    className="mt-1 w-full p-3 border dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500" />
-                </div>
-              )}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Email</label>
-                <input required type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com"
-                  className="mt-1 w-full p-3 border dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Password</label>
-                <input required type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••"
-                  className="mt-1 w-full p-3 border dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500" />
-              </div>
-              <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-lg transition-all shadow-md hover:shadow-lg">
-                {authView === 'login' ? 'Sign In' : 'Sign Up'}
-              </button>
-            </form>
+      {/* Right Pane: Login Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative">
+        {/* Toggle Theme button */}
+        <button 
+          onClick={toggleTheme} 
+          className="absolute top-6 right-6 p-3 rounded-full bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-md transition text-slate-600 dark:text-slate-300"
+          aria-label="Toggle Theme"
+        >
+          {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
 
-            <div className="mt-6 text-center space-y-2">
-              <button onClick={() => setAuthView(authView === 'login' ? 'signup' : 'login')} className="text-emerald-600 dark:text-emerald-400 text-sm hover:underline block w-full">
-                {authView === 'login' ? "Don't have an account? Sign Up" : 'Already have an account? Sign In'}
+        <div className="w-full max-w-md bg-white dark:bg-slate-800 p-8 sm:p-10 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-700 transition duration-300">
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-2 lg:hidden">
+              <span className="text-3xl">🐃</span>
+              <h1 className="text-2xl font-black text-emerald-700 dark:text-emerald-400">CommilK</h1>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-800 dark:text-white">
+              {authView === 'login' && 'Welcome Back!'}
+              {authView === 'signup' && 'Create Account'}
+              {authView === 'forgot' && 'Reset Password'}
+            </h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">
+              {authView === 'login' && 'Sign in to access your dashboard.'}
+              {authView === 'signup' && 'Register your farm to start logging milk.'}
+              {authView === 'forgot' && 'Enter your email to receive a password reset link.'}
+            </p>
+          </div>
+
+          {authView === 'forgot' ? (
+            <form onSubmit={handleForgotPassword} className="space-y-5">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Your Email</label>
+                <input 
+                  required 
+                  type="email" 
+                  value={resetEmail} 
+                  onChange={e => setResetEmail(e.target.value)} 
+                  placeholder="name@example.com"
+                  className="w-full p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 transition" 
+                />
+              </div>
+              <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold py-4 rounded-xl transition shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/30">
+                Send Reset Link
               </button>
-              {authView === 'login' && (
-                <button onClick={() => setAuthView('forgot')} className="text-slate-400 text-xs hover:underline">
-                  Forgot Password?
+              <div className="text-center mt-4">
+                <button type="button" onClick={() => setAuthView('login')} className="text-emerald-600 dark:text-emerald-400 text-sm font-semibold hover:underline">
+                  Back to Login
                 </button>
-              )}
-            </div>
-          </>
-        )}
+              </div>
+            </form>
+          ) : (
+            <>
+              <form onSubmit={authView === 'login' ? handleLogin : handleRegister} className="space-y-5">
+                {authView === 'signup' && (
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Full Name</label>
+                    <input 
+                      required 
+                      type="text" 
+                      value={fullName} 
+                      onChange={e => setFullName(e.target.value)} 
+                      placeholder="e.g. Deepesh Sharma"
+                      className="w-full p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 transition" 
+                    />
+                  </div>
+                )}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Email Address</label>
+                  <input 
+                    required 
+                    type="email" 
+                    value={email} 
+                    onChange={e => setEmail(e.target.value)} 
+                    placeholder="name@example.com"
+                    className="w-full p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 transition" 
+                  />
+                </div>
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Password</label>
+                    {authView === 'login' && (
+                      <button type="button" onClick={() => setAuthView('forgot')} className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">
+                        Forgot?
+                      </button>
+                    )}
+                  </div>
+                  <input 
+                    required 
+                    type="password" 
+                    value={password} 
+                    onChange={e => setPassword(e.target.value)} 
+                    placeholder="••••••••"
+                    className="w-full p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 transition" 
+                  />
+                </div>
+                
+                <button type="submit" className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold py-4 rounded-xl transition shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/30">
+                  {authView === 'login' ? 'Sign In' : 'Get Started'}
+                </button>
+              </form>
+
+              <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700/50 text-center">
+                <button 
+                  onClick={() => setAuthView(authView === 'login' ? 'signup' : 'login')} 
+                  className="text-emerald-600 dark:text-emerald-400 text-sm font-semibold hover:underline"
+                >
+                  {authView === 'login' ? "New to CommilK? Create an account" : 'Already have an account? Sign in'}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
