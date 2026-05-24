@@ -21,7 +21,7 @@ const NAV_ITEMS: Record<string, { to: string; icon: any; label: string }[]> = {
     { to: '/admin/orders',             icon: ShoppingBag,   label: 'Orders' },
     { to: '/admin/payments',           icon: Smartphone,    label: 'Payments' },
     { to: '/admin/create-seller',      icon: UserPlus,      label: 'Add Seller' },
-    { to: '/admin/settings',           icon: Settings,      label: 'Pay Settings' },
+    { to: '/settings',                 icon: Settings,      label: 'Settings' },
     { to: '/user/ai-chat',             icon: Sparkles,      label: 'AI Chat' },
   ],
   // ── Seller ─────────────────────────────────────────────────────────────
@@ -32,6 +32,7 @@ const NAV_ITEMS: Record<string, { to: string; icon: any; label: string }[]> = {
     { to: '/distributor/produced-milk', icon: Droplets,     label: 'Produced Milk' },
     { to: '/distributor/history',       icon: History,      label: 'History' },
     { to: '/user/ai-chat',              icon: Sparkles,     label: 'AI Chat' },
+    { to: '/settings',                  icon: Settings,      label: 'Settings' },
     { to: '/user/profile',              icon: User,         label: 'Profile' },
   ],
   // ── Customer ──────────────────────────────────────────────────────────
@@ -42,6 +43,7 @@ const NAV_ITEMS: Record<string, { to: string; icon: any; label: string }[]> = {
     { to: '/user/orders',          icon: History,       label: 'My Orders' },
     { to: '/user/support',         icon: Headphones,    label: 'Support' },
     { to: '/user/ai-chat',         icon: Sparkles,      label: 'AI Chat' },
+    { to: '/settings',             icon: Settings,      label: 'Settings' },
     { to: '/user/profile',         icon: User,          label: 'Profile' },
   ],
 };

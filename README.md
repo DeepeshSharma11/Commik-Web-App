@@ -140,10 +140,12 @@ FRONTEND_URL=http://localhost:5173
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| POST | `/api/v1/auth/register` | — | Register user |
+| POST | `/api/v1/auth/register` | — | Register user (Phone Number required) |
 | POST | `/api/v1/auth/login` | — | Login → JWT |
 | POST | `/api/v1/auth/forgot-password` | — | Send reset email |
 | POST | `/api/v1/auth/reset-password` | — | Reset with token |
+| PUT | `/api/v1/auth/profile` | JWT | Update profile details / preferences |
+| POST | `/api/v1/auth/change-password` | JWT | Change password securely |
 | GET | `/api/v1/buffaloes/` | JWT | List buffaloes |
 | POST | `/api/v1/buffaloes/` | JWT | Add buffalo |
 | GET | `/api/v1/milk-logs/` | JWT | Get milk logs |

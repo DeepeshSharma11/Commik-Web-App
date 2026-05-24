@@ -22,7 +22,7 @@ class UserRegister(BaseModel):
     email: EmailStr
     password: str
     full_name: str
-    phone: Optional[str] = None
+    phone: str
     role: str = "customer"
 
 
@@ -146,7 +146,61 @@ async def reset_password(data: ResetPasswordRequest):
 @router.get("/me")
 async def get_my_profile(user=Depends(get_current_user)):
     supabase = get_supabase_service()
-    res = await db(supabase.table("users").select("id, email, full_name, phone, village, district, avatar_url, role, created_at").eq("id", user["id"]))
+    res = await db(
+        supabase.table("users")
+        .select("id, email, full_name, phone, village, district, avatar_url, role, farm_name, daily_yield_target, preferred_delivery_address, preferred_time_slot, created_at")
+        .eq("id", user["id"])
+    )
     if not res.data:
         raise HTTPException(status_code=404, detail="User not found")
     return res.data[0]
+
+
+class ProfileUpdate(BaseModel):
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    village: Optional[str] = None
+    district: Optional[str] = None
+    avatar_url: Optional[str] = None
+    # Seller specific
+    farm_name: Optional[str] = None
+    daily_yield_target: Optional[float] = None
+    # Customer specific
+    preferred_delivery_address: Optional[str] = None
+    preferred_time_slot: Optional[str] = None
+
+
+@router.put("/profile")
+async def update_profile(data: ProfileUpdate, user=Depends(get_current_user)):
+    supabase = get_supabase_service()
+    update_data = data.model_dump(exclude_unset=True)
+    if not update_data:
+        return {"message": "No data provided to update"}
+    try:
+        res = await db(supabase.table("users").update(update_data).eq("id", user["id"]))
+        return res.data[0]
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+class ChangePasswordRequest(BaseModel):
+    old_password: str
+    new_password: str
+
+
+@router.post("/change-password")
+async def change_password(data: ChangePasswordRequest, user=Depends(get_current_user)):
+    supabase = get_supabase_service()
+    
+    # Fetch user's current password hash
+    res = await db(supabase.table("users").select("hashed_password").eq("id", user["id"]))
+    if not res.data:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    user_record = res.data[0]
+    if not await verify_password(data.old_password, user_record["hashed_password"]):
+        raise HTTPException(status_code=400, detail="Incorrect old password")
+    
+    hashed_pw = await get_password_hash(data.new_password)
+    await db(supabase.table("users").update({"hashed_password": hashed_pw}).eq("id", user["id"]))
+    return {"message": "Password updated successfully"}

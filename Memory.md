@@ -111,3 +111,7 @@ Commilk App/
 - Simplified and consolidated system roles to customer, seller, and admin.
 - Updated database schema enum, backend routes, and frontend navigation/views to use simplified roles.
 - Created `008_update_user_roles.sql` database migration script.
+- Implemented unified tabbed Settings Panel for Customer (preferences), Seller (dairy settings), and Admin (UPI payment config).
+- Added `PUT /auth/profile` and `POST /auth/change-password` backend endpoints.
+- Updated registration validator and signup form to make Phone Number a required field.
+- Created `009_add_settings_columns.sql` database migration script.

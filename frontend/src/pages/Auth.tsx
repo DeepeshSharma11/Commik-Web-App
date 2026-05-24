@@ -16,6 +16,7 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
   const [resetEmail, setResetEmail] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -36,10 +37,11 @@ const Auth = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.post('/auth/register', { email, password, full_name: fullName });
+      await api.post('/auth/register', { email, password, full_name: fullName, phone });
       toast.success('Account created successfully! Please sign in.');
       setAuthView('login');
       setPassword('');
+      setPhone('');
     } catch (err: any) {
       toast.error(err.response?.data?.detail || 'Registration failed. Try again.');
     }
@@ -172,17 +174,30 @@ const Auth = () => {
             <>
               <form onSubmit={authView === 'login' ? handleLogin : handleRegister} className="space-y-5">
                 {authView === 'signup' && (
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Full Name</label>
-                    <input 
-                      required 
-                      type="text" 
-                      value={fullName} 
-                      onChange={e => setFullName(e.target.value)} 
-                      placeholder="e.g. Deepesh Sharma"
-                      className="w-full p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 transition" 
-                    />
-                  </div>
+                  <>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Full Name</label>
+                      <input 
+                        required 
+                        type="text" 
+                        value={fullName} 
+                        onChange={e => setFullName(e.target.value)} 
+                        placeholder="e.g. Deepesh Sharma"
+                        className="w-full p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 transition" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Phone Number</label>
+                      <input 
+                        required 
+                        type="tel" 
+                        value={phone} 
+                        onChange={e => setPhone(e.target.value)} 
+                        placeholder="e.g. +91 99999 99999"
+                        className="w-full p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 transition" 
+                      />
+                    </div>
+                  </>
                 )}
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Email Address</label>
