@@ -86,6 +86,12 @@ backend/db/migrations/001_master_migration.sql
 backend/db/migrations/008_update_user_roles.sql
 ```
 
+For production launch preparation, run the cleanup script to wipe all test data and re-seed default products:
+```
+backend/db/migrations/db_cleanup.sql
+```
+
+
 ### 2. Backend
 ```bash
 cd backend
@@ -165,4 +171,5 @@ FRONTEND_URL=http://localhost:5173
 - **No hardcoded keys** anywhere in codebase
 - **Admin role** assigned via `ADMIN_EMAIL` env var only
 - **Single-use** password reset tokens (expire in 30 min)
-- **IP auto-blocking** on repeated 4xx/5xx responses
+- **IP auto-blocking** on repeated 4xx/5xx responses (proxy-aware supporting X-Forwarded-For / X-Real-IP)
+- **Rate limiting** on API endpoints to prevent DDoS and brute-force (proxy-aware)

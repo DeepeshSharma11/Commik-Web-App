@@ -3,14 +3,22 @@ from collections import defaultdict
 from fastapi import Request, HTTPException, status
 from starlette.middleware.base import BaseHTTPMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
-# Standard Rate Limiter Setup
-limiter = Limiter(key_func=get_remote_address, default_limits=["100/minute"])
+def get_real_remote_address(request: Request) -> str:
+    """Extract real client IP behind Nginx/Cloudflare reverse proxies."""
+    forwarded_for = request.headers.get("x-forwarded-for")
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+    real_ip = request.headers.get("x-real-ip")
+    if real_ip:
+        return real_ip
+    return request.client.host if request.client else "127.0.0.1"
 
-# In-memory IP blocklist for Hacker/Abuse Protection (Phase 1)
-# Note: In a scalable production environment, this should be moved to Redis.
+# Standard Rate Limiter Setup with real remote address parsing
+limiter = Limiter(key_func=get_real_remote_address, default_limits=["100/minute"])
+
+# In-memory IP blocklist for Hacker/Abuse Protection
 failed_requests_tracker = defaultdict(lambda: {"count": 0, "blocked_until": 0})
 BLOCK_THRESHOLD = 20      # Number of suspicious/failed attempts before blocking
 BLOCK_DURATION = 300      # Block duration in seconds (5 minutes)
@@ -20,7 +28,7 @@ class IPBlockMiddleware(BaseHTTPMiddleware):
     Middleware to block IPs that exhibit malicious behavior or hit 400+ errors excessively.
     """
     async def dispatch(self, request: Request, call_next):
-        client_ip = request.client.host if request.client else "unknown"
+        client_ip = get_real_remote_address(request)
         
         # Check if IP is currently blocked
         tracker = failed_requests_tracker[client_ip]

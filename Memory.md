@@ -117,4 +117,8 @@ Commilk App/
 - Created `009_add_settings_columns.sql` database migration script.
 - Implemented global network request loading progress bar (Zustand + Axios Interceptors) and local submit loaders (herd operations, daily milk logging).
 - Enhanced customer and farmer AI Chats with bouncing "thinking" dot loading states before streaming starts.
+- Created `db_cleanup.sql` script to reset all database transactional tables for public production release, preserving the admin user `Deepeshtech8433@gmail.com`.
+- Patched IPBlockMiddleware and slowapi Limiter to correctly extract real remote client IPs behind proxies (using X-Forwarded-For / X-Real-IP) to avoid global loopback blocking in production.
+
+
 
