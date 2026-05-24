@@ -39,11 +39,11 @@ class CollectionCreate(BaseModel):
         return v
 
 
-def _require_distributor(user: dict):
-    if user.get("role") not in ["distributor", "malik"]:
+def _require_seller_or_admin(user: dict):
+    if user.get("role") not in ["seller", "admin"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Distributor or Malik access required"
+            detail="Seller or Admin access required"
         )
 
 
@@ -52,10 +52,10 @@ async def get_farmers(
     search: Optional[str] = Query(None, min_length=1, max_length=100),
     user=Depends(get_current_user)
 ):
-    """Find registered farmers for milk collection."""
-    _require_distributor(user)
+    """Find registered sellers for milk collection."""
+    _require_seller_or_admin(user)
     supabase = get_supabase_service()
-    query = supabase.table("users").select("id, email, full_name, village, phone").eq("role", "farmer")
+    query = supabase.table("users").select("id, email, full_name, village, phone").eq("role", "seller")
 
     if search:
         query = query.ilike("full_name", f"%{search.strip()}%")
@@ -66,8 +66,8 @@ async def get_farmers(
 
 @router.get("/collections")
 async def get_collections(user=Depends(get_current_user)):
-    """Fetch history of milk collections. Distributors see their own; Malik sees all."""
-    _require_distributor(user)
+    """Fetch history of milk collections. Sellers see their own; Admin sees all."""
+    _require_seller_or_admin(user)
     supabase = get_supabase_service()
     query = (
         supabase.table("distributor_collections")
@@ -75,7 +75,7 @@ async def get_collections(user=Depends(get_current_user)):
         .order("collection_date", desc=True)
         .limit(200)
     )
-    if user.get("role") == "distributor":
+    if user.get("role") == "seller":
         query = query.eq("distributor_id", user["id"])
 
     res = await db(query)
@@ -89,8 +89,8 @@ async def get_produced_milk(
     farmer_id: Optional[str]  = Query(None, min_length=1),
     user=Depends(get_current_user)
 ):
-    """List milk production logs from all farmers. Distributor & Malik only."""
-    _require_distributor(user)
+    """List milk production logs from all farmers. Seller & Admin only."""
+    _require_seller_or_admin(user)
     supabase = get_supabase_service()
 
     query = (
@@ -116,18 +116,18 @@ async def get_produced_milk(
 
 @router.post("/collections")
 async def log_collection(data: CollectionCreate, user=Depends(get_current_user)):
-    """Log a new milk collection from a farmer."""
-    _require_distributor(user)
+    """Log a new milk collection from a seller."""
+    _require_seller_or_admin(user)
     supabase = get_supabase_service()
 
-    # Validate farmer exists and is a farmer
+    # Validate farmer exists and is a seller
     farmer_res = await db(
         supabase.table("users").select("id, role").eq("id", data.farmer_id)
     )
     if not farmer_res.data:
-        raise HTTPException(status_code=404, detail="Farmer not found")
-    if farmer_res.data[0].get("role") != "farmer":
-        raise HTTPException(status_code=400, detail="Selected user is not a registered farmer")
+        raise HTTPException(status_code=404, detail="Seller not found")
+    if farmer_res.data[0].get("role") != "seller":
+        raise HTTPException(status_code=400, detail="Selected user is not a registered seller")
 
     try:
         amount_due = round(data.quantity_liters * data.rate_per_liter, 2)

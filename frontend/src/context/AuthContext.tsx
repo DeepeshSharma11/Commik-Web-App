@@ -7,7 +7,7 @@ interface AuthContextType {
   setToken: (token: string | null, role: string | null) => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
-  isDistributor: boolean;
+  isSeller: boolean;
   logout: () => void;
 }
 
@@ -26,8 +26,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     role,
     setToken,
     isAuthenticated: !!token,
-    isAdmin: role === 'malik',
-    isDistributor: role === 'distributor',
+    isAdmin: role === 'admin',
+    isSeller: role === 'seller',
     logout,
   };
 

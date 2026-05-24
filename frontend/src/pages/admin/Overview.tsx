@@ -64,7 +64,7 @@ const Overview = () => {
         <div className="absolute top-0 right-0 p-8 opacity-10"><BarChart3 size={160} /></div>
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold flex items-center gap-3">
-            <ShieldCheck className="text-blue-300" /> Malik Command Center
+            <ShieldCheck className="text-blue-300" /> Admin Command Center
           </h2>
           <button onClick={fetchAll} className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition" title="Refresh">
             <RefreshCw size={18} />
@@ -88,9 +88,9 @@ const Overview = () => {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 relative z-10">
           {[
-            { label: 'Customers',    value: roleBreakdown['user'] || 0 },
-            { label: 'Farmers',      value: roleBreakdown['farmer'] || 0 },
-            { label: 'Distributors', value: roleBreakdown['distributor'] || 0 },
+            { label: 'Customers',    value: roleBreakdown['customer'] || 0 },
+            { label: 'Sellers',      value: roleBreakdown['seller'] || 0 },
+            { label: 'Admins',       value: roleBreakdown['admin'] || 0 },
             { label: 'Revenue (₹)',  value: `₹${stats?.total_orders_revenue?.toLocaleString()}` },
           ].map(s => (
             <div key={s.label} className="bg-white/5 p-4 rounded-xl border border-white/10 flex justify-between items-center">

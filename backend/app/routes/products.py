@@ -24,7 +24,7 @@ async def get_all_products(user=Depends(get_current_user)):
     # Only active products for regular users
     query = supabase.table("products").select("id, name, description, price, unit, category, image, tag, is_active, created_at").order("created_at")
     
-    if user.get("role") != "malik":
+    if user.get("role") != "admin":
         query = query.eq("is_active", True)
         
     res = await db(query)
@@ -32,8 +32,8 @@ async def get_all_products(user=Depends(get_current_user)):
 
 @router.post("/")
 async def create_product(product: ProductCreate, user=Depends(get_current_user)):
-    """Only malik can add new products."""
-    if user.get("role") != "malik":
+    """Only admin can add new products."""
+    if user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Forbidden")
         
     supabase = get_supabase_service()
@@ -42,8 +42,8 @@ async def create_product(product: ProductCreate, user=Depends(get_current_user))
 
 @router.delete("/{product_id}")
 async def delete_product(product_id: str, user=Depends(get_current_user)):
-    """Only malik can delete/deactivate products."""
-    if user.get("role") != "malik":
+    """Only admin can delete/deactivate products."""
+    if user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Forbidden")
         
     supabase = get_supabase_service()

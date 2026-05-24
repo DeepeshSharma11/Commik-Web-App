@@ -22,7 +22,7 @@ A production-grade multi-panel dairy management system for buffalo farmers in In
 
 ## Features
 
-- **3 Role Panels**: Farmer (user), Distributor, Malik (Admin/Owner)
+- **3 Role Panels**: Customer (shopping), Seller (farming & collections), Admin (all access)
 - **Secure Auth**: Custom bcrypt + JWT — no Supabase Auth dependency
 - **IP Blocking**: Auto-blocks IPs after repeated suspicious requests
 - **Rate Limiting**: Per-endpoint via `slowapi`
@@ -53,7 +53,7 @@ Commilk App/
 │   │   │   ├── buffaloes.py       # CRUD for buffaloes
 │   │   │   ├── milk_logs.py       # Daily milk tracking
 │   │   │   ├── sales.py           # Sales management
-│   │   │   ├── admin.py           # Malik-only analytics
+│   │   │   ├── admin.py           # Admin-only analytics
 │   │   │   └── ai_chat.py         # RAG + memory AI chat
 │   │   ├── services/
 │   │   │   ├── email.py           # Resend → SMTP logic
@@ -78,9 +78,10 @@ Commilk App/
 ## Setup
 
 ### 1. Database
-Open **Supabase SQL Editor** and run the entire file:
+Open **Supabase SQL Editor** and run the master migration files:
 ```
 backend/db/migrations/001_master_migration.sql
+backend/db/migrations/008_update_user_roles.sql
 ```
 
 ### 2. Backend
@@ -148,9 +149,8 @@ FRONTEND_URL=http://localhost:5173
 | GET | `/api/v1/milk-logs/` | JWT | Get milk logs |
 | POST | `/api/v1/milk-logs/` | JWT | Log milk |
 | GET | `/api/v1/sales/` | JWT | Get sales |
-| POST | `/api/v1/admin/distributors` | Malik | Create/Upgrade Distributor |
-| POST | `/api/v1/admin/farmers` | Malik | Create/Upgrade Farmer |
-| GET | `/api/v1/admin/analytics` | Malik | Business analytics |
+| POST | `/api/v1/admin/sellers` | Admin | Create/Upgrade Seller |
+| GET | `/api/v1/admin/analytics` | Admin | Business analytics |
 | POST | `/api/v1/ai/chat` | JWT | AI chat (Fallback) |
 | POST | `/api/v1/ai/chat/stream` | JWT | AI chat (Real-time SSE) |
 

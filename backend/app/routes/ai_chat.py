@@ -31,11 +31,11 @@ async def fetch_user_context(supabase, user_id: str) -> str:
     context = []
     if user_res.data:
         u = user_res.data[0]
-        context.append(f"Farmer Name: {u['full_name']}, Location: {u.get('village', 'Unknown')}")
+        context.append(f"Seller Name: {u['full_name']}, Location: {u.get('village', 'Unknown')}")
 
     buffaloes = buf_res.data
     if not buffaloes:
-        context.append("The farmer currently has no buffaloes registered.")
+        context.append("The seller currently has no buffaloes registered.")
         return "\n".join(context)
 
     context.append(f"Registered Buffaloes: {len(buffaloes)}")
@@ -71,7 +71,7 @@ def _build_messages(system_prompt: str, history: list, user_message: str) -> lis
 
 
 def _system_prompt(farm_context: str) -> str:
-    return f"""You are an elite AI assistant for a buffalo dairy farmer using CommilK.
+    return f"""You are an elite AI assistant for a buffalo dairy seller using CommilK.
 Give practical, highly personalized, concise advice for buffalo health, milk yield, and farming.
 Remember everything said in this conversation — reference past context when relevant.
 

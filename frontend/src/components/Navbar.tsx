@@ -15,33 +15,27 @@ const TYPE_ICON: Record<string, string> = {
 // Role-specific nav items
 const NAV_ITEMS: Record<string, { to: string; icon: any; label: string }[]> = {
   // ── Admin ──────────────────────────────────────────────────────────────
-  malik: [
+  admin: [
     { to: '/admin/overview',           icon: BarChart3,     label: 'Overview' },
     { to: '/admin/users',              icon: UsersIcon,     label: 'Users' },
     { to: '/admin/orders',             icon: ShoppingBag,   label: 'Orders' },
     { to: '/admin/payments',           icon: Smartphone,    label: 'Payments' },
-    { to: '/admin/create-distributor', icon: UserPlus,      label: 'Add Distributor' },
-    { to: '/admin/create-farmer',      icon: Tractor,       label: 'Add Farmer' },
+    { to: '/admin/create-seller',      icon: UserPlus,      label: 'Add Seller' },
     { to: '/admin/settings',           icon: Settings,      label: 'Pay Settings' },
     { to: '/user/ai-chat',             icon: Sparkles,      label: 'AI Chat' },
   ],
-  // ── Distributor (Only admin can create this account) ────────────────
-  distributor: [
-    { to: '/distributor/sell-milk',     icon: PackagePlus,  label: 'Sell Milk' },
+  // ── Seller ─────────────────────────────────────────────────────────────
+  seller: [
+    { to: '/user/farm',                 icon: Tractor,      label: 'My Farm' },
+    { to: '/user/my-listings',          icon: PackagePlus,  label: 'List Milk' },
     { to: '/distributor/log',           icon: PlusCircle,   label: 'Log Collection' },
     { to: '/distributor/produced-milk', icon: Droplets,     label: 'Produced Milk' },
     { to: '/distributor/history',       icon: History,      label: 'History' },
     { to: '/user/ai-chat',              icon: Sparkles,     label: 'AI Chat' },
+    { to: '/user/profile',              icon: User,         label: 'Profile' },
   ],
-  // ── Farmer (Admin sets role=farmer) ────────────────────────────────
-  farmer: [
-    { to: '/user/farm',         icon: Tractor,      label: 'My Farm' },
-    { to: '/user/my-listings',  icon: PackagePlus,  label: 'List Milk' },
-    { to: '/user/ai-chat',      icon: Sparkles,     label: 'AI Chat' },
-    { to: '/user/profile',      icon: User,         label: 'Profile' },
-  ],
-  // ── Customer ────────────────────────────────────────────────────────
-  user: [
+  // ── Customer ──────────────────────────────────────────────────────────
+  customer: [
     { to: '/user/shop',            icon: ShoppingBag,   label: 'Shop' },
     { to: '/user/fresh-milk',      icon: Milk,          label: 'Fresh Milk' },
     { to: '/user/cart',            icon: ShoppingCart,  label: 'Cart' },
@@ -71,7 +65,7 @@ const Navbar = () => {
     return () => { document.body.style.overflow = ''; };
   }, [mobileMenuOpen]);
 
-  const navItems = NAV_ITEMS[role || 'user'] || NAV_ITEMS.user;
+  const navItems = NAV_ITEMS[role || 'customer'] || NAV_ITEMS.customer;
 
   // ── Notification state ──────────────────────────────────────
   const [notifOpen, setNotifOpen] = useState(false);
@@ -207,10 +201,10 @@ const Navbar = () => {
         </div>
 
         {/* Role badge */}
-        {role !== 'user' && (
+        {role !== 'customer' && (
           <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800">
             <span className="inline-block bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-xs uppercase font-black px-3 py-1 rounded-full tracking-wider">
-              {role === 'malik' ? 'Admin' : 'Distributor'}
+              {role === 'admin' ? 'Admin' : 'Seller'}
             </span>
           </div>
         )}
@@ -254,13 +248,13 @@ const Navbar = () => {
           </button>
 
           {/* Logo */}
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate(role === 'malik' ? '/admin' : role === 'distributor' ? '/distributor' : '/user/shop')}>
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate(role === 'admin' ? '/admin' : role === 'seller' ? '/user/farm' : '/user/shop')}>
             <span className="text-xl sm:text-2xl font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
               <img src="/commilk_logo.png" alt="CommilK Logo" className="h-6 sm:h-8 object-contain" />
             </span>
-            {role !== 'user' && (
+            {role !== 'customer' && (
               <span className="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">
-                {role === 'malik' ? 'Admin' : 'Distributor'}
+                {role === 'admin' ? 'Admin' : 'Seller'}
               </span>
             )}
           </div>

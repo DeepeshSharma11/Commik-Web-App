@@ -23,7 +23,7 @@ class UserRegister(BaseModel):
     password: str
     full_name: str
     phone: Optional[str] = None
-    role: str = "user"
+    role: str = "customer"
 
 
 class ForgotPasswordRequest(BaseModel):
@@ -46,7 +46,7 @@ async def register_user(data: UserRegister):
 
     # Hash password — async (CPU-bound in thread pool)
     hashed_pw = await get_password_hash(data.password)
-    assigned_role = "malik" if data.email.lower() == settings.ADMIN_EMAIL.lower() else "user"
+    assigned_role = "admin" if data.email.lower() == settings.ADMIN_EMAIL.lower() else "customer"
 
     try:
         res = await db(supabase.table("users").insert({

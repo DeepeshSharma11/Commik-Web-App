@@ -13,10 +13,10 @@
 - **Email Queue**: Asyncio-based background worker with retry logic
 - **Fully Asynchronous**: High performance APIs, non-blocking DB calls (`async_db.py`)
 - **Dark / Light Mode**: Persisted across sessions
-- **Panels**: 3 RBAC roles: `user` (Farmer), `distributor`, `malik` (Admin/Owner)
+- **Panels**: 3 RBAC roles: `customer` (Shopping), `seller` (Farmer/Distributor functions), `admin` (Owner/all access)
 - **Backend Security**: FastAPI verifies JWTs and is the **sole security gateway**. All DB access via `SUPABASE_SERVICE_ROLE_KEY`.
 - **Data Isolation**: Enforced in Python — not at DB level (no RLS). Pattern: `owner_id == user["id"]`.
-- **Admin**: `ADMIN_EMAIL` in `.env` auto-assigns `malik` role on registration. Never hardcode.
+- **Admin**: `ADMIN_EMAIL` in `.env` auto-assigns `admin` role on registration. Never hardcode.
 - **No hardcoded secrets**: All keys in `.env`. Template in `.env.example`.
 - **Migration SQL**: All DB queries managed in `backend/db/migrations/001_master_migration.sql`. Run this in Supabase SQL Editor for full setup.
 
@@ -108,3 +108,6 @@ Commilk App/
 - Redesigned Auth page to split-screen layout with visual features showcase and polished input styling.
 - Overhauled Farmer Dashboard with responsive CSS weekly yield trend chart, breed breakdown analytics, ear-tag styled cattle cards, and edit buffalo capabilities (supported by extending backend BuffaloUpdate model).
 - Upgraded Farmer AI Chat to support smooth SSE real-time streaming with markdown rendering.
+- Simplified and consolidated system roles to customer, seller, and admin.
+- Updated database schema enum, backend routes, and frontend navigation/views to use simplified roles.
+- Created `008_update_user_roles.sql` database migration script.

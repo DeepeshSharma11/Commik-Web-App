@@ -29,7 +29,7 @@ async def get_milk_logs(
     supabase = get_supabase_service()
     query = supabase.table("milk_logs").select("id, buffalo_id, logged_by, log_date, morning_qty_liters, evening_qty_liters, total_qty_liters, fat_percent, snf_percent, notes, created_at")
 
-    if user.get("role") != "malik":
+    if user.get("role") != "admin":
         query = query.eq("logged_by", user["id"])
     if log_date:
         query = query.eq("log_date", str(log_date))
@@ -49,7 +49,7 @@ async def add_milk_log(data: MilkLogCreate, user=Depends(get_current_user)):
         supabase.table("buffaloes").select("owner_id").eq("id", data.buffalo_id)
     )
     if not buffalo_check.data or (
-        buffalo_check.data[0]["owner_id"] != user["id"] and user.get("role") != "malik"
+        buffalo_check.data[0]["owner_id"] != user["id"] and user.get("role") != "admin"
     ):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

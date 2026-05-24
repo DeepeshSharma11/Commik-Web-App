@@ -3,7 +3,7 @@ import { Tractor, UserPlus } from 'lucide-react';
 import { api } from '../../api';
 import { toast } from 'react-hot-toast';
 
-const CreateFarmer = () => {
+const CreateSeller = () => {
   const [form, setForm] = useState({ full_name: '', email: '', password: '', phone: '', village: '' });
   const [loading, setLoading] = useState(false);
 
@@ -15,11 +15,11 @@ const CreateFarmer = () => {
     if (form.password.length < 6) return toast.error('Password must be at least 6 characters');
     setLoading(true);
     try {
-      const res = await api.post('/admin/farmers', form);
+      const res = await api.post('/admin/sellers', form);
       toast.success(res.data.message);
       setForm({ full_name: '', email: '', password: '', phone: '', village: '' });
     } catch (err: any) {
-      toast.error(err?.response?.data?.detail || 'Failed to create farmer');
+      toast.error(err?.response?.data?.detail || 'Failed to create seller');
     } finally { setLoading(false); }
   };
 
@@ -45,15 +45,15 @@ const CreateFarmer = () => {
           <Tractor size={24} />
         </div>
         <div>
-          <h3 className="text-xl font-black text-slate-900 dark:text-white">Create Farmer Account</h3>
-          <p className="text-sm text-slate-500">New account banao ya existing user ko farmer banao.</p>
+          <h3 className="text-xl font-black text-slate-900 dark:text-white">Create Seller Account</h3>
+          <p className="text-sm text-slate-500">New account banao ya existing user ko seller banao.</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid sm:grid-cols-2 gap-4">
           {field('Full Name *', 'full_name', 'text', 'e.g. Mohan Singh')}
-          {field('Email *', 'email', 'email', 'farmer@example.com')}
+          {field('Email *', 'email', 'email', 'seller@example.com')}
         </div>
         {field('Password *', 'password', 'password', 'Min 6 characters')}
         <div className="grid sm:grid-cols-2 gap-4">
@@ -62,12 +62,12 @@ const CreateFarmer = () => {
         </div>
 
         <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl p-3 text-xs text-blue-700 dark:text-blue-300">
-          💡 <strong>Tip:</strong> Agar email already registered hai, user ka role automatically farmer ho jayega — password change nahi hoga.
+          💡 <strong>Tip:</strong> Agar email already registered hai, user ka role automatically seller ho jayega — password change nahi hoga.
         </div>
 
-        {/* Farmer capabilities */}
+        {/* Seller capabilities */}
         <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-xl p-4 text-sm text-emerald-700 dark:text-emerald-300">
-          <strong>Farmer access includes:</strong> Buffalo management, Daily milk logs, List milk for sale, AI Farm assistant.
+          <strong>Seller access includes:</strong> Buffalo management, daily milk logs, listing milk for sale, logging collections, viewing produced milk, and AI chat.
         </div>
 
         <button type="submit" disabled={loading}
@@ -75,11 +75,11 @@ const CreateFarmer = () => {
           {loading
             ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
             : <UserPlus size={18} />}
-          {loading ? 'Creating...' : 'Create Farmer Account'}
+          {loading ? 'Creating...' : 'Create Seller Account'}
         </button>
       </form>
     </div>
   );
 };
 
-export default CreateFarmer;
+export default CreateSeller;

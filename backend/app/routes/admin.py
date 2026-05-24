@@ -8,15 +8,15 @@ from app.db.async_db import db
 from app.dependencies.auth import get_current_user, get_password_hash
 from app.routes.notifications import push_notification
 
-router = APIRouter(prefix="/admin", tags=["Admin (Malik)"])
+router = APIRouter(prefix="/admin", tags=["Admin"])
 
 
-def _require_malik(user: dict):
-    if user.get("role") != "malik":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Malik access required")
+def _require_admin(user: dict):
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
 
 
-class CreateDistributorData(BaseModel):
+class CreateSellerData(BaseModel):
     full_name: str
     email: EmailStr
     password: str
@@ -31,19 +31,19 @@ class CreateDistributorData(BaseModel):
         return v
 
 
-@router.post("/distributors", status_code=201)
-async def create_distributor(data: CreateDistributorData, user=Depends(get_current_user)):
-    """Admin creates OR upgrades a user to distributor role."""
-    _require_malik(user)
+@router.post("/sellers", status_code=201)
+async def create_seller(data: CreateSellerData, user=Depends(get_current_user)):
+    """Admin creates OR upgrades a user to seller role."""
+    _require_admin(user)
     supabase = get_supabase_service()
     existing = await db(supabase.table("users").select("id, full_name, role").ilike("email", data.email))
 
     if existing.data:
         # User exists → just upgrade their role
         existing_user = existing.data[0]
-        await db(supabase.table("users").update({"role": "distributor"}).eq("id", existing_user["id"]))
+        await db(supabase.table("users").update({"role": "seller"}).eq("id", existing_user["id"]))
         return {
-            "message": f"'{existing_user['full_name']}' ka role distributor kar diya gaya (was: {existing_user['role']})",
+            "message": f"'{existing_user['full_name']}' ka role seller kar diya gaya (was: {existing_user['role']})",
             "id": existing_user["id"],
             "action": "role_upgraded",
         }
@@ -52,41 +52,11 @@ async def create_distributor(data: CreateDistributorData, user=Depends(get_curre
     hashed = await get_password_hash(data.password)
     res = await db(supabase.table("users").insert({
         "full_name": data.full_name, "email": data.email.lower(),
-        "hashed_password": hashed, "role": "distributor",
+        "hashed_password": hashed, "role": "seller",
         "phone": data.phone, "village": data.village,
     }))
     new_user = res.data[0]
-    return {"message": f"Distributor account created for {new_user['full_name']}", "id": new_user["id"], "action": "created"}
-
-
-@router.post("/farmers", status_code=201)
-async def create_farmer(data: CreateDistributorData, user=Depends(get_current_user)):
-    """Admin creates OR upgrades a user to farmer role."""
-    _require_malik(user)
-    supabase = get_supabase_service()
-    existing = await db(supabase.table("users").select("id, full_name, role").ilike("email", data.email))
-
-    if existing.data:
-        # User exists → just upgrade their role
-        existing_user = existing.data[0]
-        await db(supabase.table("users").update({"role": "farmer"}).eq("id", existing_user["id"]))
-        return {
-            "message": f"'{existing_user['full_name']}' ka role farmer kar diya gaya (was: {existing_user['role']})",
-            "id": existing_user["id"],
-            "action": "role_upgraded",
-        }
-
-    # New user → create account
-    hashed = await get_password_hash(data.password)
-    res = await db(supabase.table("users").insert({
-        "full_name": data.full_name, "email": data.email.lower(),
-        "hashed_password": hashed, "role": "farmer",
-        "phone": data.phone, "village": data.village,
-    }))
-    new_user = res.data[0]
-    return {"message": f"Farmer account created for {new_user['full_name']}", "id": new_user["id"], "action": "created"}
-
-
+    return {"message": f"Seller account created for {new_user['full_name']}", "id": new_user["id"], "action": "created"}
 
 
 class RoleUpdate(BaseModel):
@@ -95,7 +65,7 @@ class RoleUpdate(BaseModel):
 
 @router.get("/users")
 async def list_users(user=Depends(get_current_user)):
-    _require_malik(user)
+    _require_admin(user)
     supabase = get_supabase_service()
     res = await db(
         supabase.table("users")
@@ -107,10 +77,10 @@ async def list_users(user=Depends(get_current_user)):
 
 @router.patch("/users/{user_id}/role")
 async def change_user_role(user_id: str, data: RoleUpdate, user=Depends(get_current_user)):
-    _require_malik(user)
+    _require_admin(user)
     if user_id == user["id"]:
         raise HTTPException(status_code=400, detail="Cannot change your own role")
-    allowed = {"user", "farmer", "distributor", "malik"}
+    allowed = {"customer", "seller", "admin"}
     if data.role not in allowed:
         raise HTTPException(status_code=400, detail=f"Role must be one of: {allowed}")
     supabase = get_supabase_service()
@@ -123,7 +93,7 @@ async def change_user_role(user_id: str, data: RoleUpdate, user=Depends(get_curr
 
 @router.get("/analytics")
 async def business_analytics(user=Depends(get_current_user)):
-    _require_malik(user)
+    _require_admin(user)
     supabase = get_supabase_service()
     buf_res, logs_res, orders_res, collections_res, users_res, listings_res, milk_orders_res = await asyncio.gather(
         db(supabase.table("buffaloes").select("id", count="exact")),
@@ -183,7 +153,7 @@ async def business_analytics(user=Depends(get_current_user)):
 
 @router.get("/orders")
 async def get_all_orders(user=Depends(get_current_user)):
-    _require_malik(user)
+    _require_admin(user)
     supabase = get_supabase_service()
     res = await db(
         supabase.table("orders")
@@ -196,7 +166,7 @@ async def get_all_orders(user=Depends(get_current_user)):
 
 @router.patch("/orders/{order_id}/status")
 async def update_order_status(order_id: str, status_update: dict, user=Depends(get_current_user)):
-    _require_malik(user)
+    _require_admin(user)
     new_status = status_update.get("status")
     allowed_statuses = {"pending", "confirmed", "delivered", "cancelled"}
     if new_status not in allowed_statuses:
@@ -236,7 +206,7 @@ class PaymentSettingsUpdate(BaseModel):
 
 @router.get("/payment-settings")
 async def get_payment_settings_admin(user=Depends(get_current_user)):
-    _require_malik(user)
+    _require_admin(user)
     supabase = get_supabase_service()
     res = await db(supabase.table("payment_settings").select("id, upi_id, mobile_number, qr_code_url, is_active, business_name, created_at, updated_at").limit(1))
     return res.data[0] if res.data else {}
@@ -244,7 +214,7 @@ async def get_payment_settings_admin(user=Depends(get_current_user)):
 
 @router.put("/payment-settings")
 async def update_payment_settings(data: PaymentSettingsUpdate, user=Depends(get_current_user)):
-    _require_malik(user)
+    _require_admin(user)
     supabase = get_supabase_service()
     existing = await db(supabase.table("payment_settings").select("id").limit(1))
     payload = {**data.model_dump(), "updated_at": datetime.now(timezone.utc).isoformat()}
@@ -272,7 +242,7 @@ class PaymentVerdict(BaseModel):
 @router.get("/payments")
 async def get_payments(user=Depends(get_current_user)):
     """All orders with payment info for admin review."""
-    _require_malik(user)
+    _require_admin(user)
     supabase = get_supabase_service()
     res = await db(
         supabase.table("orders")
@@ -290,7 +260,7 @@ async def get_payments(user=Depends(get_current_user)):
 @router.patch("/payments/{order_id}/verify")
 async def verify_payment(order_id: str, data: PaymentVerdict, user=Depends(get_current_user)):
     """Admin verifies or rejects a submitted UTR."""
-    _require_malik(user)
+    _require_admin(user)
     supabase = get_supabase_service()
     res = await db(supabase.table("orders").select("id, payment_status, customer_id").eq("id", order_id))
     if not res.data:

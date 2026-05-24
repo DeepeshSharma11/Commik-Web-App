@@ -30,27 +30,26 @@ const AppRoutes = () => {
          <Route path="/*" element={
            <Layout>
              <Routes>
-               {/* Role-based Redirection for base path */}
-               <Route path="" element={
-                 role === 'malik'       ? <Navigate to="/admin" replace />       :
-                 role === 'distributor' ? <Navigate to="/distributor" replace /> :
-                 role === 'farmer'      ? <Navigate to="/user/farm" replace />   :
-                 <Navigate to="/user" replace />
-               } />
+                {/* Role-based Redirection for base path */}
+                <Route path="" element={
+                  role === 'admin'  ? <Navigate to="/admin" replace /> :
+                  role === 'seller' ? <Navigate to="/user/farm" replace /> :
+                  <Navigate to="/user" replace />
+                } />
 
-               {/* Role Specific Route Modules */}
-               <Route path="profile" element={<Profile />} />
-               <Route path="privacy" element={<PrivacyPolicy />} />
-               <Route path="terms" element={<TermsOfService />} />
-               <Route path="user/*" element={<UserRoutes />} />
-               
-               <Route element={<ProtectedRoute allowedRoles={['malik']} />}>
-                 <Route path="admin/*" element={<AdminRoutes />} />
-               </Route>
+                {/* Role Specific Route Modules */}
+                <Route path="profile" element={<Profile />} />
+                <Route path="privacy" element={<PrivacyPolicy />} />
+                <Route path="terms" element={<TermsOfService />} />
+                <Route path="user/*" element={<UserRoutes />} />
+                
+                <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+                  <Route path="admin/*" element={<AdminRoutes />} />
+                </Route>
 
-               <Route element={<ProtectedRoute allowedRoles={['distributor', 'malik']} />}>
-                 <Route path="distributor/*" element={<DistributorRoutes />} />
-               </Route>
+                <Route element={<ProtectedRoute allowedRoles={['seller', 'admin']} />}>
+                  <Route path="distributor/*" element={<DistributorRoutes />} />
+                </Route>
 
                <Route path="unauthorized" element={
                  <div className="text-center p-20">

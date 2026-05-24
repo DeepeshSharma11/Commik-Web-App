@@ -16,8 +16,8 @@ BUCKET_NAME = "commilk-assets"  # Create this bucket in Supabase Storage
 @router.post("/upload-qr")
 async def upload_qr_code(file: UploadFile = File(...), user=Depends(get_current_user)):
     """Admin uploads a QR code image; returns its public URL."""
-    if user.get("role") != "malik":
-        raise HTTPException(status_code=403, detail="Malik access required")
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
 
     allowed_types = {"image/png", "image/jpeg", "image/jpg", "image/webp"}
     if file.content_type not in allowed_types:
@@ -77,7 +77,7 @@ class SubmitUTR(BaseModel):
 @router.post("/submit-utr")
 async def submit_utr(data: SubmitUTR, user=Depends(get_current_user)):
     """Customer submits the UPI transaction reference after paying."""
-    if user.get("role") != "user":
+    if user.get("role") != "customer":
         raise HTTPException(status_code=403, detail="Customers only")
 
     utr = data.utr.strip()

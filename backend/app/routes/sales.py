@@ -22,10 +22,8 @@ async def get_sales(user=Depends(get_current_user)):
     query = supabase.table("sales").select("id, amount, date, status, user_id")
     
     # Secure role-based filtering
-    if user.get("role") == "user":
-        query = query.eq("seller_id", user["id"])
-    elif user.get("role") == "distributor":
-        query = query.eq("distributor_id", user["id"])
+    if user.get("role") == "seller":
+        query = query.or_(f"seller_id.eq.{user['id']},distributor_id.eq.{user['id']}")
         
     res = await db(query)
     return res.data

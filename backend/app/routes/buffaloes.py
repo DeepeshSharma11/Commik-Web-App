@@ -27,7 +27,7 @@ class BuffaloUpdate(BaseModel):
 async def list_buffaloes(user=Depends(get_current_user)):
     supabase = get_supabase_service()
     query = supabase.table("buffaloes").select("id, owner_id, name, tag_number, breed, status, purchase_date, purchase_price, image_url, notes, created_at")
-    if user.get("role") != "malik":
+    if user.get("role") != "admin":
         query = query.eq("owner_id", user["id"])
     res = await db(query)
     return res.data
@@ -53,7 +53,7 @@ async def update_buffalo(buffalo_id: str, data: BuffaloUpdate, user=Depends(get_
         supabase.table("buffaloes").select("owner_id").eq("id", buffalo_id)
     )
     if not existing.data or (
-        existing.data[0]["owner_id"] != user["id"] and user.get("role") != "malik"
+        existing.data[0]["owner_id"] != user["id"] and user.get("role") != "admin"
     ):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Buffalo not found or unauthorized")
 
@@ -74,7 +74,7 @@ async def delete_buffalo(buffalo_id: str, user=Depends(get_current_user)):
 
     # Verify ownership
     existing = await db(supabase.table("buffaloes").select("owner_id").eq("id", buffalo_id))
-    if not existing.data or (existing.data[0]["owner_id"] != user["id"] and user.get("role") != "malik"):
+    if not existing.data or (existing.data[0]["owner_id"] != user["id"] and user.get("role") != "admin"):
         raise HTTPException(status_code=404, detail="Buffalo not found")
 
     try:

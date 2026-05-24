@@ -57,9 +57,9 @@ class MilkOrderCreate(BaseModel):
 
 # ─── Helper ───────────────────────────────────────────────────────────────────
 
-def _require_farmer(user: dict):
-    if user.get("role") not in ("farmer", "malik"):
-        raise HTTPException(status_code=403, detail="Farmer access required")
+def _require_seller(user: dict):
+    if user.get("role") not in ("seller", "admin"):
+        raise HTTPException(status_code=403, detail="Seller access required")
 
 
 # ─── Farmer: Create Listing ───────────────────────────────────────────────────
@@ -102,7 +102,7 @@ async def withdraw_listing(listing_id: str, user=Depends(get_current_user)):
     if not res.data:
         raise HTTPException(status_code=404, detail="Listing not found")
     row = res.data[0]
-    if row["farmer_id"] != user["id"] and user.get("role") != "malik":
+    if row["farmer_id"] != user["id"] and user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Not your listing")
     if row["status"] == "withdrawn":
         raise HTTPException(status_code=400, detail="Already withdrawn")
@@ -148,7 +148,7 @@ async def get_all_listings(
     user=Depends(get_current_user)
 ):
     """Admin/Distributor: see all listings regardless of status."""
-    if user.get("role") not in ("distributor", "malik"):
+    if user.get("role") not in ("seller", "admin"):
         raise HTTPException(status_code=403, detail="Access denied")
     supabase = get_supabase_service()
     query = (
@@ -234,8 +234,8 @@ async def my_milk_orders(user=Depends(get_current_user)):
 @router.get("/orders/all")
 async def all_milk_orders(user=Depends(get_current_user)):
     """Admin sees all fresh milk orders."""
-    if user.get("role") != "malik":
-        raise HTTPException(status_code=403, detail="Malik access required")
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
     supabase = get_supabase_service()
 
     # Query 1: orders + listing info + customer info (single users join)
@@ -279,8 +279,8 @@ async def all_milk_orders(user=Depends(get_current_user)):
 @router.patch("/orders/{order_id}/status")
 async def update_milk_order_status(order_id: str, payload: dict, user=Depends(get_current_user)):
     """Admin confirms/delivers/cancels a fresh milk order."""
-    if user.get("role") != "malik":
-        raise HTTPException(status_code=403, detail="Malik access required")
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
     new_status = payload.get("status")
     if new_status not in ("pending", "confirmed", "delivered", "cancelled"):
         raise HTTPException(status_code=400, detail="Invalid status")

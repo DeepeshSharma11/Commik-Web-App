@@ -21,7 +21,7 @@ async def get_health_records(buffalo_id: str, user=Depends(get_current_user)):
     
     # Verify buffalo ownership
     buffalo = await db(supabase.table("buffaloes").select("owner_id").eq("id", buffalo_id))
-    if not buffalo.data or (buffalo.data[0]["owner_id"] != user["id"] and user.get("role") != "malik"):
+    if not buffalo.data or (buffalo.data[0]["owner_id"] != user["id"] and user.get("role") != "admin"):
          raise HTTPException(status_code=404, detail="Buffalo not found")
          
     res = await db(supabase.table("health_records").select("id, buffalo_id, record_date, record_type, description, status, next_checkup_date, created_at").eq("buffalo_id", buffalo_id).order("record_date", desc=True))
@@ -33,7 +33,7 @@ async def add_health_record(data: HealthRecordCreate, user=Depends(get_current_u
     
     # Verify buffalo ownership
     buffalo = await db(supabase.table("buffaloes").select("owner_id").eq("id", data.buffalo_id))
-    if not buffalo.data or (buffalo.data[0]["owner_id"] != user["id"] and user.get("role") != "malik"):
+    if not buffalo.data or (buffalo.data[0]["owner_id"] != user["id"] and user.get("role") != "admin"):
          raise HTTPException(status_code=404, detail="Buffalo not found")
          
     try:

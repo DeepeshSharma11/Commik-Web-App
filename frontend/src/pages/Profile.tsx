@@ -61,9 +61,9 @@ const Profile = () => {
               </h1>
               <p className="text-slate-500 flex items-center gap-2 mt-1">
                 <ShieldCheck size={16} className={`
-                  ${profile.role === 'malik' ? 'text-rose-500' : ''}
-                  ${profile.role === 'distributor' ? 'text-amber-500' : ''}
-                  ${profile.role === 'user' ? 'text-emerald-500' : ''}
+                  ${profile.role === 'admin' ? 'text-rose-500' : ''}
+                  ${profile.role === 'seller' ? 'text-emerald-500' : ''}
+                  ${profile.role === 'customer' ? 'text-blue-500' : ''}
                 `} />
                 <span className="uppercase text-xs font-bold tracking-wider">{profile.role} Account</span>
               </p>

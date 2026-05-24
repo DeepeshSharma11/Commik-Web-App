@@ -57,7 +57,7 @@ class OrderCreate(BaseModel):
 
 
 def _require_customer(user: dict):
-    if user.get("role") not in ["user"]:
+    if user.get("role") not in ["customer"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only customers can place orders"
@@ -127,7 +127,7 @@ async def place_order(data: OrderCreate, user=Depends(get_current_user)):
 @router.get("/")
 async def get_my_orders(user=Depends(get_current_user)):
     """Fetch order history. Customers see own orders; Malik sees all."""
-    if user.get("role") not in ["user", "malik"]:
+    if user.get("role") not in ["customer", "admin"]:
         raise HTTPException(status_code=403, detail="Unauthorized")
 
     supabase = get_supabase_service()
@@ -138,7 +138,7 @@ async def get_my_orders(user=Depends(get_current_user)):
         .limit(100)
     )
 
-    if user.get("role") == "user":
+    if user.get("role") == "customer":
         query = query.eq("customer_id", user["id"])
 
     res = await db(query)
@@ -158,8 +158,8 @@ async def cancel_order(order_id: str, user=Depends(get_current_user)):
 
     order = res.data[0]
 
-    # Only owner or malik can cancel
-    if user.get("role") != "malik" and order["customer_id"] != user["id"]:
+    # Only owner or admin can cancel
+    if user.get("role") != "admin" and order["customer_id"] != user["id"]:
         raise HTTPException(status_code=403, detail="Not your order")
 
     if order["status"] != "pending":
