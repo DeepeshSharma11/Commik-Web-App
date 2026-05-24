@@ -49,6 +49,12 @@ const FarmerDashboard = () => {
   const [healthDesc, setHealthDesc] = useState('');
   const [healthCost, setHealthCost] = useState('');
 
+  // Form submission loading states
+  const [submittingAdd, setSubmittingAdd] = useState(false);
+  const [submittingEdit, setSubmittingEdit] = useState(false);
+  const [submittingMilk, setSubmittingMilk] = useState(false);
+  const [submittingHealth, setSubmittingHealth] = useState(false);
+
   // Fetch all dashboard data
   const fetchDashboard = async () => {
     try {
@@ -151,6 +157,7 @@ const FarmerDashboard = () => {
   // Buffalo Operations
   const handleAddBuffalo = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmittingAdd(true);
     try {
       await api.post('/buffaloes/', {
         name: newBufName,
@@ -165,6 +172,8 @@ const FarmerDashboard = () => {
       fetchDashboard();
     } catch {
       toast.error('Could not register buffalo.');
+    } finally {
+      setSubmittingAdd(false);
     }
   };
 
@@ -180,6 +189,7 @@ const FarmerDashboard = () => {
 
   const handleEditBuffalo = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmittingEdit(true);
     try {
       await api.put(`/buffaloes/${editBufId}`, {
         name: editBufName || null,
@@ -193,6 +203,8 @@ const FarmerDashboard = () => {
       fetchDashboard();
     } catch {
       toast.error('Failed to update details.');
+    } finally {
+      setSubmittingEdit(false);
     }
   };
 
@@ -211,6 +223,7 @@ const FarmerDashboard = () => {
   const handleLogMilk = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedBuf) return toast.error('Please choose a buffalo.');
+    setSubmittingMilk(true);
     try {
       await api.post('/milk-logs/', {
         buffalo_id: selectedBuf,
@@ -224,6 +237,8 @@ const FarmerDashboard = () => {
       fetchDashboard();
     } catch {
       toast.error('Could not log milk.');
+    } finally {
+      setSubmittingMilk(false);
     }
   };
 
@@ -231,6 +246,7 @@ const FarmerDashboard = () => {
   const handleLogHealth = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!healthBufId) return toast.error('Please select a buffalo.');
+    setSubmittingHealth(true);
     try {
       await api.post('/health/', {
         buffalo_id: healthBufId,
@@ -244,6 +260,8 @@ const FarmerDashboard = () => {
       setHealthDesc(''); setHealthCost(''); setHealthBufId('');
     } catch {
       toast.error('Failed to save health record.');
+    } finally {
+      setSubmittingHealth(false);
     }
   };
 
@@ -376,8 +394,15 @@ const FarmerDashboard = () => {
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">Notes</label>
                 <textarea value={newBufNotes} onChange={e => setNewBufNotes(e.target.value)} placeholder="Age, milk records, pedigree details..." className="w-full p-3.5 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-white h-20 resize-none" />
               </div>
-              <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl shadow-lg transition">
-                Add Buffalo to Herd
+              <button type="submit" disabled={submittingAdd} className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-bold py-4 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                {submittingAdd ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Registering...</span>
+                  </>
+                ) : (
+                  'Add Buffalo to Herd'
+                )}
               </button>
             </form>
           </div>
@@ -422,8 +447,15 @@ const FarmerDashboard = () => {
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">Notes</label>
                 <textarea value={editBufNotes} onChange={e => setEditBufNotes(e.target.value)} placeholder="Additional info..." className="w-full p-3.5 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-white h-20 resize-none" />
               </div>
-              <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl shadow-lg transition">
-                Update Buffalo
+              <button type="submit" disabled={submittingEdit} className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-bold py-4 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                {submittingEdit ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Updating...</span>
+                  </>
+                ) : (
+                  'Update Buffalo'
+                )}
               </button>
             </form>
           </div>
@@ -467,8 +499,15 @@ const FarmerDashboard = () => {
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">Vet Treatment Cost (₹)</label>
                 <input type="number" value={healthCost} onChange={e => setHealthCost(e.target.value)} placeholder="e.g. 500" className="w-full p-3.5 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-white" />
               </div>
-              <button type="submit" className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-4 rounded-xl shadow-lg transition">
-                Save Medical Entry
+              <button type="submit" disabled={submittingHealth} className="w-full bg-rose-600 hover:bg-rose-700 disabled:opacity-60 text-white font-bold py-4 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                {submittingHealth ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  'Save Medical Entry'
+                )}
               </button>
             </form>
           </div>
@@ -686,8 +725,15 @@ const FarmerDashboard = () => {
               </div>
             </div>
 
-            <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl shadow-lg transition">
-              Save Yield Log
+            <button type="submit" disabled={submittingMilk} className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-bold py-4 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+              {submittingMilk ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Saving...</span>
+                </>
+              ) : (
+                'Save Yield Log'
+              )}
             </button>
           </form>
         </div>
@@ -738,11 +784,19 @@ const FarmerDashboard = () => {
               }`}>
                 {msg.role === 'user' ? (
                   <span className="whitespace-pre-wrap">{msg.text}</span>
+                ) : msg.text ? (
+                  <div className="relative">
+                    <MarkdownMessage text={msg.text} />
+                    {msg.streaming && (
+                      <span className="inline-block w-1.5 h-4 bg-emerald-450 ml-1 animate-pulse rounded-sm align-middle" />
+                    )}
+                  </div>
                 ) : (
-                  <MarkdownMessage text={msg.text} />
-                )}
-                {msg.streaming && (
-                  <span className="inline-block w-1.5 h-4 bg-emerald-450 ml-1 animate-pulse rounded-sm" />
+                  <div className="flex items-center gap-1.5 py-1.5 px-0.5">
+                    <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </div>
                 )}
               </div>
             </div>

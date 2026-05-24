@@ -176,11 +176,21 @@ const AIChat = () => {
                 ? 'bg-emerald-600 text-white rounded-br-sm shadow-md'
                 : 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-bl-sm'
             }`}>
-              {msg.role === 'user'
-                ? <span className="whitespace-pre-wrap">{msg.text}</span>
-                : <MarkdownMessage text={msg.text} />}
-              {msg.streaming && (
-                <span className="inline-block w-1.5 h-4 bg-emerald-500 ml-0.5 animate-pulse rounded-sm" />
+              {msg.role === 'user' ? (
+                <span className="whitespace-pre-wrap">{msg.text}</span>
+              ) : msg.text ? (
+                <div className="relative">
+                  <MarkdownMessage text={msg.text} />
+                  {msg.streaming && (
+                    <span className="inline-block w-1.5 h-4 bg-emerald-500 ml-0.5 animate-pulse rounded-sm align-middle" />
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 py-1.5 px-0.5">
+                  <span className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
               )}
             </div>
             {msg.role === 'user' && (

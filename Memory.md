@@ -115,3 +115,6 @@ Commilk App/
 - Added `PUT /auth/profile` and `POST /auth/change-password` backend endpoints.
 - Updated registration validator and signup form to make Phone Number a required field.
 - Created `009_add_settings_columns.sql` database migration script.
+- Implemented global network request loading progress bar (Zustand + Axios Interceptors) and local submit loaders (herd operations, daily milk logging).
+- Enhanced customer and farmer AI Chats with bouncing "thinking" dot loading states before streaming starts.
+

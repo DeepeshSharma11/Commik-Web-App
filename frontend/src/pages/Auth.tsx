@@ -18,9 +18,11 @@ const Auth = () => {
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [resetEmail, setResetEmail] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const formData = new URLSearchParams();
       formData.append('username', email);
@@ -31,11 +33,14 @@ const Auth = () => {
       navigate('/');
     } catch {
       toast.error('Invalid email or password. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
       await api.post('/auth/register', { email, password, full_name: fullName, phone });
       toast.success('Account created successfully! Please sign in.');
@@ -44,11 +49,14 @@ const Auth = () => {
       setPhone('');
     } catch (err: any) {
       toast.error(err.response?.data?.detail || 'Registration failed. Try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
       await api.post('/auth/forgot-password', { email: resetEmail });
       toast.success('We sent a reset link to your email.');
@@ -56,6 +64,8 @@ const Auth = () => {
       setResetEmail('');
     } catch {
       toast.error('Something went wrong. Please check your email and try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -154,18 +164,26 @@ const Auth = () => {
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Your Email</label>
                 <input 
                   required 
+                  disabled={loading}
                   type="email" 
                   value={resetEmail} 
                   onChange={e => setResetEmail(e.target.value)} 
                   placeholder="name@example.com"
-                  className="w-full p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 transition" 
+                  className="w-full p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 transition disabled:opacity-50" 
                 />
               </div>
-              <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold py-4 rounded-xl transition shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/30">
-                Send Reset Link
+              <button type="submit" disabled={loading} className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 active:scale-98 text-white font-bold py-4 rounded-xl transition shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/30 flex items-center justify-center gap-2">
+                {loading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Sending...</span>
+                  </>
+                ) : (
+                  'Send Reset Link'
+                )}
               </button>
               <div className="text-center mt-4">
-                <button type="button" onClick={() => setAuthView('login')} className="text-emerald-600 dark:text-emerald-400 text-sm font-semibold hover:underline">
+                <button type="button" disabled={loading} onClick={() => setAuthView('login')} className="text-emerald-600 dark:text-emerald-400 text-sm font-semibold hover:underline disabled:opacity-50">
                   Back to Login
                 </button>
               </div>
@@ -179,22 +197,24 @@ const Auth = () => {
                       <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Full Name</label>
                       <input 
                         required 
+                        disabled={loading}
                         type="text" 
                         value={fullName} 
                         onChange={e => setFullName(e.target.value)} 
                         placeholder="e.g. Deepesh Sharma"
-                        className="w-full p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 transition" 
+                        className="w-full p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 transition disabled:opacity-50" 
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Phone Number</label>
                       <input 
                         required 
+                        disabled={loading}
                         type="tel" 
                         value={phone} 
                         onChange={e => setPhone(e.target.value)} 
                         placeholder="e.g. +91 99999 99999"
-                        className="w-full p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 transition" 
+                        className="w-full p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 transition disabled:opacity-50" 
                       />
                     </div>
                   </>
@@ -203,41 +223,51 @@ const Auth = () => {
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Email Address</label>
                   <input 
                     required 
+                    disabled={loading}
                     type="email" 
                     value={email} 
                     onChange={e => setEmail(e.target.value)} 
                     placeholder="name@example.com"
-                    className="w-full p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 transition" 
+                    className="w-full p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 transition disabled:opacity-50" 
                   />
                 </div>
                 <div>
                   <div className="flex justify-between items-center mb-2">
                     <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Password</label>
                     {authView === 'login' && (
-                      <button type="button" onClick={() => setAuthView('forgot')} className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">
+                      <button type="button" disabled={loading} onClick={() => setAuthView('forgot')} className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline disabled:opacity-50">
                         Forgot?
                       </button>
                     )}
                   </div>
                   <input 
                     required 
+                    disabled={loading}
                     type="password" 
                     value={password} 
                     onChange={e => setPassword(e.target.value)} 
                     placeholder="••••••••"
-                    className="w-full p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 transition" 
+                    className="w-full p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 transition disabled:opacity-50" 
                   />
                 </div>
                 
-                <button type="submit" className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold py-4 rounded-xl transition shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/30">
-                  {authView === 'login' ? 'Sign In' : 'Get Started'}
+                <button type="submit" disabled={loading} className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 active:scale-98 text-white font-bold py-4 rounded-xl transition shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/30 flex items-center justify-center gap-2">
+                  {loading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>{authView === 'login' ? 'Signing In...' : 'Registering...'}</span>
+                    </>
+                  ) : (
+                    authView === 'login' ? 'Sign In' : 'Get Started'
+                  )}
                 </button>
               </form>
 
               <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700/50 text-center">
                 <button 
+                  disabled={loading}
                   onClick={() => setAuthView(authView === 'login' ? 'signup' : 'login')} 
-                  className="text-emerald-600 dark:text-emerald-400 text-sm font-semibold hover:underline"
+                  className="text-emerald-600 dark:text-emerald-400 text-sm font-semibold hover:underline disabled:opacity-50"
                 >
                   {authView === 'login' ? "New to CommilK? Create an account" : 'Already have an account? Sign in'}
                 </button>

@@ -34,6 +34,8 @@ A production-grade multi-panel dairy management system for buffalo farmers in In
 - **Dynamic UI Engine**: Flexible `SectionLayout` for grids, sliders, and lists
 - **Role-Based Navigation**: Dynamic headers, hidden scrollbars, strict RBAC
 - **Multi-variant Components**: Adaptive cards that transition gracefully between grid and list modes
+- **Interactive UI Feedback**: Global top-level network progress bar, local submit loaders for forms, and bouncing "thinking" dots for streaming AI Chats
+
 
 ---
 

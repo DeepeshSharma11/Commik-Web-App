@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, ThemeProvider, CartProvider, useAuth } from './context';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './layouts/Layout';
+import LoadingBar from './components/LoadingBar';
 
 // Pages
 import Auth from './pages/Auth';
@@ -72,6 +73,7 @@ const AppRoutes = () => {
 function App() {
   return (
     <ThemeProvider>
+      <LoadingBar />
       <AuthProvider>
         <CartProvider>
           <BrowserRouter>

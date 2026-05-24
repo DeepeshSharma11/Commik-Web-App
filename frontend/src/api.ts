@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useAppStore } from './store';
+import { useAppStore, useUIStore } from './store';
 import toast from 'react-hot-toast';
 
 export const api = axios.create({
@@ -7,16 +7,24 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
+  useUIStore.getState().startRequest();
   const token = useAppStore.getState().token;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
+}, (error) => {
+  useUIStore.getState().endRequest();
+  return Promise.reject(error);
 });
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    useUIStore.getState().endRequest();
+    return response;
+  },
   (error) => {
+    useUIStore.getState().endRequest();
     if (error.response?.status === 401) {
       useAppStore.getState().setToken(null, null);
       toast.error('Session expired. Please login again.');
@@ -24,3 +32,4 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
