@@ -81,6 +81,7 @@ Open **Supabase SQL Editor** and run the master migration files:
 ```
 backend/db/migrations/001_master_migration.sql
 backend/db/migrations/008_update_user_roles.sql
+backend/db/migrations/010_signup_otps.sql
 ```
 
 For production launch preparation, run the cleanup script to wipe all test data and re-seed default products:
@@ -146,6 +147,7 @@ FRONTEND_URL=http://localhost:5173
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
 | POST | `/api/v1/auth/register` | — | Register user (Phone Number required) |
+| POST | `/api/v1/auth/verify-otp` | — | Verify email signup OTP code |
 | POST | `/api/v1/auth/login` | — | Login → JWT |
 | POST | `/api/v1/auth/forgot-password` | — | Send reset email |
 | POST | `/api/v1/auth/reset-password` | — | Reset with token |

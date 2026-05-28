@@ -102,3 +102,21 @@ async def enqueue_password_reset(to_email: str, reset_token: str):
     </div>
     """
     await enqueue_email(to_email, "Reset your CommilK password", html)
+
+
+async def enqueue_signup_otp(to_email: str, otp: str):
+    """Convenience wrapper for signup verification OTP emails."""
+    html = f"""
+    <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px;border:1px solid #e2e8f0;border-radius:12px;">
+      <h2 style="color:#10b981;">🐃 CommilK — Email Verification</h2>
+      <p style="color:#475569;">Welcome to CommilK! Please verify your email address to complete your registration.</p>
+      <div style="margin:24px 0;padding:16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;text-align:center;">
+        <span style="font-size:32px;font-weight:800;letter-spacing:6px;color:#0f766e;">{otp}</span>
+      </div>
+      <p style="font-size:12px;color:#94a3b8;">This OTP is valid for 10 minutes. If you did not sign up for an account, please ignore this email.</p>
+      <hr style="margin-top:24px;border-color:#e2e8f0;" />
+      <p style="font-size:11px;color:#cbd5e1;">Sent by CommilK Dairy Management System</p>
+    </div>
+    """
+    await enqueue_email(to_email, "Verify your CommilK Account", html)
+

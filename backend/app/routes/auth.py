@@ -12,7 +12,7 @@ from app.core.config import settings
 from app.db.supabase_client import get_supabase_service
 from app.db.async_db import db
 from app.dependencies.auth import get_password_hash, verify_password, create_access_token, get_current_user
-from app.services.email_queue import enqueue_password_reset
+from app.services.email_queue import enqueue_password_reset, enqueue_signup_otp
 
 logger = logging.getLogger("commilk.auth")
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -35,6 +35,11 @@ class ResetPasswordRequest(BaseModel):
     new_password: str
 
 
+class VerifyOtpRequest(BaseModel):
+    email: EmailStr
+    otp: str
+
+
 @router.post("/register")
 async def register_user(data: UserRegister):
     supabase = get_supabase_service()
@@ -46,19 +51,92 @@ async def register_user(data: UserRegister):
 
     # Hash password — async (CPU-bound in thread pool)
     hashed_pw = await get_password_hash(data.password)
-    assigned_role = "admin" if data.email.lower() == settings.ADMIN_EMAIL.lower() else "customer"
+    assigned_role = "admin" if data.email.lower() == settings.ADMIN_EMAIL.lower() else data.role
+
+    # Generate 6-digit verification code
+    otp = "".join(secrets.choice("0123456789") for _ in range(6))
+    expires_at = (datetime.now(timezone.utc) + timedelta(minutes=10)).isoformat()
 
     try:
-        res = await db(supabase.table("users").insert({
+        # Clear any existing pending signups for this email to prevent conflict
+        await db(supabase.table("signup_otps").delete().eq("email", data.email.lower()))
+
+        # Save signup info + OTP
+        await db(supabase.table("signup_otps").insert({
             "email": data.email.lower(),
             "hashed_password": hashed_pw,
             "full_name": data.full_name,
             "phone": data.phone,
             "role": assigned_role,
+            "otp": otp,
+            "expires_at": expires_at
         }))
-        return {"message": "Registration successful", "user_id": res.data[0]["id"]}
+
+        # Queue the verification email
+        await enqueue_signup_otp(data.email.lower(), otp)
+        
+        return {"message": "Verification code sent to your email"}
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        logger.error(f"[Register] Error during register: {e}")
+        raise HTTPException(status_code=400, detail="Registration failed. Please try again.")
+
+
+@router.post("/verify-otp")
+async def verify_otp(data: VerifyOtpRequest):
+    supabase = get_supabase_service()
+
+    # Fetch OTP record
+    res = await db(
+        supabase.table("signup_otps")
+        .select("id, email, hashed_password, full_name, phone, role, otp, expires_at")
+        .eq("email", data.email.lower())
+        .eq("otp", data.otp.strip())
+    )
+
+    if not res.data:
+        raise HTTPException(status_code=400, detail="Invalid verification code")
+
+    otp_record = res.data[0]
+
+    expires_at = datetime.fromisoformat(otp_record["expires_at"].replace("Z", "+00:00"))
+    if datetime.now(timezone.utc) > expires_at:
+        # Delete expired OTP
+        await db(supabase.table("signup_otps").delete().eq("id", otp_record["id"]))
+        raise HTTPException(status_code=400, detail="Verification code has expired. Please sign up again.")
+
+    # Check duplicate in users
+    existing = await db(supabase.table("users").select("id").ilike("email", otp_record["email"]))
+    if existing.data:
+        await db(supabase.table("signup_otps").delete().eq("id", otp_record["id"]))
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    # Insert into users table and clean up OTP record
+    try:
+        assigned_role = "admin" if otp_record["email"].lower() == settings.ADMIN_EMAIL.lower() else otp_record["role"]
+
+        # Insert user & delete OTP record concurrently
+        insert_res, _ = await asyncio.gather(
+            db(supabase.table("users").insert({
+                "email": otp_record["email"].lower(),
+                "hashed_password": otp_record["hashed_password"],
+                "full_name": otp_record["full_name"],
+                "phone": otp_record["phone"],
+                "role": assigned_role,
+            })),
+            db(supabase.table("signup_otps").delete().eq("id", otp_record["id"]))
+        )
+
+        new_user = insert_res.data[0]
+        access_token = create_access_token(data={"sub": new_user["id"], "role": new_user["role"]})
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "role": new_user["role"],
+            "message": "Account verified and created successfully!"
+        }
+    except Exception as e:
+        logger.error(f"[VerifyOTP] Error creating user: {e}")
+        raise HTTPException(status_code=500, detail="Error creating account. Please try again.")
 
 
 @router.post("/login")

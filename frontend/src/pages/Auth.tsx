@@ -5,7 +5,7 @@ import { useAuth, useTheme } from '../context';
 import { api } from '../api';
 import { useNavigate } from 'react-router-dom';
 
-type AuthView = 'login' | 'signup' | 'forgot';
+type AuthView = 'login' | 'signup' | 'forgot' | 'otp';
 
 const Auth = () => {
   const { setToken } = useAuth();
@@ -18,6 +18,7 @@ const Auth = () => {
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [resetEmail, setResetEmail] = useState('');
+  const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -43,12 +44,38 @@ const Auth = () => {
     setLoading(true);
     try {
       await api.post('/auth/register', { email, password, full_name: fullName, phone });
-      toast.success('Account created successfully! Please sign in.');
-      setAuthView('login');
-      setPassword('');
-      setPhone('');
+      toast.success('Verification code sent to your email!');
+      setAuthView('otp');
+      setOtp('');
     } catch (err: any) {
       toast.error(err.response?.data?.detail || 'Registration failed. Try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await api.post('/auth/verify-otp', { email, otp });
+      setToken(res.data.access_token, res.data.role);
+      toast.success('Email verified successfully! Welcome.');
+      navigate('/');
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Invalid or expired OTP. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setLoading(true);
+    try {
+      await api.post('/auth/register', { email, password, full_name: fullName, phone });
+      toast.success('A new verification code has been sent!');
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Failed to resend code. Try again.');
     } finally {
       setLoading(false);
     }
@@ -150,15 +177,17 @@ const Auth = () => {
               {authView === 'login' && 'Welcome Back!'}
               {authView === 'signup' && 'Create Account'}
               {authView === 'forgot' && 'Reset Password'}
+              {authView === 'otp' && 'Verify Email'}
             </h2>
             <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">
               {authView === 'login' && 'Sign in to access your dashboard.'}
               {authView === 'signup' && 'Register your farm to start logging milk.'}
               {authView === 'forgot' && 'Enter your email to receive a password reset link.'}
+              {authView === 'otp' && `We sent a 6-digit verification code to ${email}.`}
             </p>
           </div>
 
-          {authView === 'forgot' ? (
+          {authView === 'forgot' && (
             <form onSubmit={handleForgotPassword} className="space-y-5">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Your Email</label>
@@ -188,7 +217,45 @@ const Auth = () => {
                 </button>
               </div>
             </form>
-          ) : (
+          )}
+
+          {authView === 'otp' && (
+            <form onSubmit={handleVerifyOtp} className="space-y-5">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Enter Verification Code</label>
+                <input 
+                  required 
+                  disabled={loading}
+                  type="text" 
+                  maxLength={6}
+                  value={otp} 
+                  onChange={e => setOtp(e.target.value.replace(/\D/g, ''))} 
+                  placeholder="e.g. 123456"
+                  className="w-full p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 text-center text-2xl font-black tracking-widest transition disabled:opacity-50" 
+                />
+              </div>
+              <button type="submit" disabled={loading || otp.length < 6} className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 active:scale-98 text-white font-bold py-4 rounded-xl transition shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/30 flex items-center justify-center gap-2">
+                {loading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Verifying...</span>
+                  </>
+                ) : (
+                  'Verify Code'
+                )}
+              </button>
+              <div className="flex justify-between items-center mt-4">
+                <button type="button" disabled={loading} onClick={handleResendOtp} className="text-emerald-600 dark:text-emerald-400 text-sm font-semibold hover:underline disabled:opacity-50">
+                  Resend Code
+                </button>
+                <button type="button" disabled={loading} onClick={() => setAuthView('signup')} className="text-slate-500 text-sm font-semibold hover:underline disabled:opacity-50">
+                  Back to Sign Up
+                </button>
+              </div>
+            </form>
+          )}
+
+          {(authView === 'login' || authView === 'signup') && (
             <>
               <form onSubmit={authView === 'login' ? handleLogin : handleRegister} className="space-y-5">
                 {authView === 'signup' && (

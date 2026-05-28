@@ -23,8 +23,10 @@ TRUNCATE TABLE
     bulk_order_requests,
     webhook_events,
     payment_settings,
-    products
+    products,
+    signup_otps
     CASCADE;
+
 
 -- 2. Delete all users except the target admin
 DELETE FROM users 
