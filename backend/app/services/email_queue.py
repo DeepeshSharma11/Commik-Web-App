@@ -2,7 +2,6 @@
 Async Email Queue — asyncio-based, no external deps (no Redis/Celery)
 - Emails are enqueued and processed by a background worker
 - Max queue size: 500 (drops oldest if full)
-- Concurrency: 1 worker (prevents SMTP rate limits)
 - Retry: 2 retries per email with 5s delay
 """
 import asyncio
@@ -29,7 +28,7 @@ _worker_task: Optional[asyncio.Task] = None
 
 
 async def _worker():
-    """Background worker: processes emails serially to avoid SMTP floods."""
+    """Background worker: processes emails serially."""
     from app.services.email import send_email
     logger.info("[EmailQueue] Worker started")
 

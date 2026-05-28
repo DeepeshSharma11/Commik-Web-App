@@ -1,18 +1,17 @@
 """
-Email Service: Resend (primary) → Google SMTP (fallback)
+Email Service: Resend only
 """
-import smtplib
 import logging
 import resend
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 from app.core.config import settings
 
 logger = logging.getLogger("commilk.email")
 
 
-def _send_via_resend(to_email: str, subject: str, html: str) -> bool:
+def send_email(to_email: str, subject: str, html: str) -> bool:
+    """Send email via Resend. Returns True on success."""
     if not settings.RESEND_API_KEY:
+        logger.error("[Email] RESEND_API_KEY not configured")
         return False
     try:
         resend.api_key = settings.RESEND_API_KEY
@@ -23,56 +22,23 @@ def _send_via_resend(to_email: str, subject: str, html: str) -> bool:
             "html": html,
         }
         resend.Emails.send(params)
+        logger.info(f"[Email] Sent via Resend to {to_email}")
         return True
     except Exception as e:
         error_msg = str(e)
-        logger.warning(f"[Resend] Failed with config from-email: {error_msg}")
-        # If the domain is not verified, retry with onboarding@resend.dev (for sandbox/development)
+        logger.warning(f"[Resend] Failed: {error_msg}")
+        # Sandbox fallback: retry with onboarding@resend.dev if domain not verified
         if "not verified" in error_msg.lower() or "verify your domain" in error_msg.lower():
             try:
                 logger.info("[Resend] Retrying with sandbox sender 'onboarding@resend.dev'")
                 params["from"] = "CommilK <onboarding@resend.dev>"
                 resend.Emails.send(params)
+                logger.info(f"[Email] Sent via Resend sandbox to {to_email}")
                 return True
             except Exception as retry_err:
                 logger.warning(f"[Resend] Sandbox retry failed: {retry_err}")
+        logger.error(f"[Email] Failed for {to_email}")
         return False
-
-
-def _send_via_smtp(to_email: str, subject: str, html: str) -> bool:
-    if not settings.SMTP_USER or not settings.SMTP_PASSWORD:
-        logger.debug("[SMTP] Skipped: credentials not configured")
-        return False
-    try:
-        msg = MIMEMultipart("alternative")
-        msg["Subject"] = subject
-        msg["From"] = f"CommilK <{settings.SMTP_USER}>"
-        msg["To"] = to_email
-        msg.attach(MIMEText(html, "html"))
-
-        with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=10) as server:
-            server.ehlo()
-            server.starttls()
-            server.ehlo()
-            server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
-            server.sendmail(settings.SMTP_USER, to_email, msg.as_string())
-        logger.info(f"[SMTP] Sent to {to_email}")
-        return True
-    except Exception as e:
-        logger.error(f"[SMTP] Failed: {type(e).__name__}: {e}")
-        return False
-
-
-def send_email(to_email: str, subject: str, html: str) -> bool:
-    """Try Resend first, fall back to SMTP."""
-    if _send_via_resend(to_email, subject, html):
-        logger.info(f"[Email] Sent via Resend to {to_email}")
-        return True
-    if _send_via_smtp(to_email, subject, html):
-        logger.info(f"[Email] Sent via SMTP to {to_email}")
-        return True
-    logger.error(f"[Email] All providers failed for {to_email}")
-    return False
 
 
 def send_password_reset_email(to_email: str, reset_token: str):

@@ -16,7 +16,7 @@ A production-grade multi-panel dairy management system for buffalo farmers in In
 | Database | Supabase (PostgreSQL) — Thread-pool wrapped for full async |
 | Auth | Custom JWT (Bcrypt + python-jose) |
 | AI | Groq Llama 3.3 70B (RAG + Memory) |
-| Email | Resend API → Gmail SMTP fallback |
+| Email | Resend API |
 
 ---
 
@@ -27,7 +27,7 @@ A production-grade multi-panel dairy management system for buffalo farmers in In
 - **IP Blocking**: Auto-blocks IPs after repeated suspicious requests
 - **Rate Limiting**: Per-endpoint via `slowapi`
 - **AI Assistant**: RAG-powered (reads live farm data) + conversation memory
-- **Password Reset**: Resend API primary, Google SMTP fallback
+- **Password Reset**: Resend API only
 - **Email Queue**: Async background worker with retry logic
 - **Fully Asynchronous**: High performance API via `asyncio` and thread-pool DB wrapping
 - **Dark / Light Mode**: Persisted across sessions
@@ -124,12 +124,8 @@ SUPABASE_ANON_KEY=sb_publishable_...
 
 GROQ_API_KEY=gsk_...
 
-RESEND_API_KEY=re_...         # Primary email
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your@gmail.com      # Fallback email
-SMTP_PASSWORD=xxxx xxxx xxxx  # Gmail App Password
-EMAIL_FROM=your@gmail.com
+RESEND_API_KEY=re_...         # Email provider
+EMAIL_FROM=noreply@commilk.com
 FRONTEND_URL=http://localhost:5173
 ```
 
