@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { LogOut, Sun, Moon, Bell, User, CheckCheck, X, Menu, BarChart3, Users as UsersIcon, ShoppingBag, Smartphone, Settings, UserPlus, PlusCircle, History, ShoppingCart, CreditCard, Truck, Headphones, AlertTriangle, Sparkles, Droplets, PackagePlus, Milk, Tractor } from 'lucide-react';
-import { useAuth, useTheme } from '../context';
+import { useAuth, useTheme, useCart } from '../context';
 import { useNavigate, NavLink, useLocation } from 'react-router-dom';
 import { api } from '../api';
 
@@ -53,6 +53,7 @@ const NAV_ITEMS: Record<string, { to: string; icon: any; label: string }[]> = {
 const Navbar = () => {
   const { role, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { totalItems } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -68,6 +69,35 @@ const Navbar = () => {
   }, [mobileMenuOpen]);
 
   const navItems = NAV_ITEMS[role || 'customer'] || NAV_ITEMS.customer;
+
+  // Derive bottom navigation bar items
+  const bottomNavItems = React.useMemo(() => {
+    const userRole = role || 'customer';
+    switch (userRole) {
+      case 'admin':
+        return [
+          { to: '/admin/overview', icon: BarChart3, label: 'Overview' },
+          { to: '/admin/users', icon: UsersIcon, label: 'Users' },
+          { to: '/admin/orders', icon: ShoppingBag, label: 'Orders' },
+          { to: '/user/ai-chat', icon: Sparkles, label: 'AI Chat' },
+        ];
+      case 'seller':
+        return [
+          { to: '/user/farm', icon: Tractor, label: 'My Farm' },
+          { to: '/user/my-listings', icon: PackagePlus, label: 'List Milk' },
+          { to: '/user/ai-chat', icon: Sparkles, label: 'AI Chat' },
+          { to: '/distributor/log', icon: PlusCircle, label: 'Log' },
+        ];
+      case 'customer':
+      default:
+        return [
+          { to: '/user/shop', icon: ShoppingBag, label: 'Shop' },
+          { to: '/user/fresh-milk', icon: Milk, label: 'Fresh Milk' },
+          { to: '/user/cart', icon: ShoppingCart, label: 'Cart', badge: totalItems },
+          { to: '/user/ai-chat', icon: Sparkles, label: 'AI Chat' },
+        ];
+    }
+  }, [role, totalItems]);
 
   // ── Notification state ──────────────────────────────────────
   const [notifOpen, setNotifOpen] = useState(false);
@@ -242,13 +272,8 @@ const Navbar = () => {
   return (
     <>
       <header className="bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 h-16 sticky top-0 z-40 shadow-sm px-4 sm:px-6 flex items-center justify-between transition-colors">
-        {/* Left: Hamburger + Logo */}
+        {/* Left: Logo */}
         <div className="flex items-center gap-3">
-          {/* Mobile hamburger */}
-          <button onClick={() => setMobileMenuOpen(true)} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition lg:hidden" aria-label="Menu">
-            <Menu size={22} />
-          </button>
-
           {/* Logo */}
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate(role === 'admin' ? '/admin' : role === 'seller' ? '/user/farm' : '/user/shop')}>
             <span className="text-xl sm:text-2xl font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
@@ -279,9 +304,9 @@ const Navbar = () => {
 
         {/* Right: Actions */}
         <div className="flex items-center gap-1.5 sm:gap-2">
-          {/* Theme - desktop only */}
+          {/* Theme Toggle - Visible on all devices */}
           <button onClick={toggleTheme}
-            className="hidden sm:flex p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition"
+            className="flex p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition"
             aria-label="Toggle Theme">
             {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           </button>
@@ -306,6 +331,50 @@ const Navbar = () => {
           </button>
         </div>
       </header>
+
+      {/* Responsive Bottom Navigation Bar for Mobile/Tablet */}
+      <nav 
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800/80 shadow-[0_-4px_12px_rgba(0,0,0,0.03)] dark:shadow-[0_-4px_12px_rgba(0,0,0,0.2)] flex items-center justify-around px-2"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 6px)', paddingTop: '6px' }}
+      >
+        {bottomNavItems.map(item => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            className={({ isActive }) => `relative flex flex-col items-center justify-center flex-1 py-1 text-[10px] font-extrabold uppercase tracking-wider transition-all duration-200 active:scale-95 ${
+              isActive
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
+            }`}
+          >
+            {/* Icon Container with optional Badge */}
+            <div className="relative p-1">
+              <item.icon size={20} className="stroke-[2.2]" />
+              {item.badge !== undefined && item.badge > 0 && (
+                <span className="absolute -top-1 -right-2 min-w-[16px] h-[16px] bg-rose-500 text-white text-[9px] font-black rounded-full flex items-center justify-center px-1 shadow-sm leading-none">
+                  {item.badge > 99 ? '99+' : item.badge}
+                </span>
+              )}
+            </div>
+            <span className="mt-0.5 leading-none text-[8px] sm:text-[9px]">{item.label}</span>
+          </NavLink>
+        ))}
+        
+        {/* 5th Tab: Menu Toggle */}
+        <button
+          onClick={() => setMobileMenuOpen(prev => !prev)}
+          className={`flex flex-col items-center justify-center flex-1 py-1 text-[10px] font-extrabold uppercase tracking-wider transition-all duration-200 active:scale-95 ${
+            mobileMenuOpen
+              ? 'text-emerald-600 dark:text-emerald-400'
+              : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
+          }`}
+        >
+          <div className="relative p-1">
+            {mobileMenuOpen ? <X size={20} className="stroke-[2.2]" /> : <Menu size={20} className="stroke-[2.2]" />}
+          </div>
+          <span className="mt-0.5 leading-none text-[8px] sm:text-[9px]">{mobileMenuOpen ? 'Close' : 'Menu'}</span>
+        </button>
+      </nav>
 
       {notifDrawer}
       {mobileDrawer}

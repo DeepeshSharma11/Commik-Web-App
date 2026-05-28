@@ -1,5 +1,8 @@
 # CommilK — Buffalo Dairy Management System
 
+> [!IMPORTANT]
+> **READ `Memory.md` BEFORE MAKING ANY CHANGES.**
+
 A production-grade multi-panel dairy management system for buffalo farmers in India.
 
 ---
@@ -29,7 +32,7 @@ A production-grade multi-panel dairy management system for buffalo farmers in In
 - **Fully Asynchronous**: High performance API via `asyncio` and thread-pool DB wrapping
 - **Dark / Light Mode**: Persisted across sessions
 - **Dynamic UI Engine**: Flexible `SectionLayout` for grids, sliders, and lists
-- **Role-Based Navigation**: Dynamic headers, hidden scrollbars, strict RBAC
+- **Role-Based Navigation**: Responsive layout with a sleek 5-tab fixed bottom navigation bar on mobile/tablet (Shop, Fresh Milk, Cart count badge, AI Chat, Menu drawer toggle) and dynamic top header on desktop.
 - **Multi-variant Components**: Adaptive cards that transition gracefully between grid and list modes
 - **Interactive UI Feedback**: Global top-level network progress bar, local submit loaders for forms, and bouncing "thinking" dots for streaming AI Chats
 

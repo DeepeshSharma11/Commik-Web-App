@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
-    <footer className="bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700 py-6 mt-auto transition-colors">
+    <footer className="bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700 pt-6 pb-24 lg:py-6 mt-auto transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="text-slate-500 dark:text-slate-400 text-sm">
           &copy; {new Date().getFullYear()} CommilK. All rights reserved.
