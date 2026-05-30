@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { User, ShieldCheck, Tractor, Truck, Smartphone, Settings as SettingsIcon } from 'lucide-react';
+import { User, ShieldCheck, Tractor, Truck, Smartphone, Settings as SettingsIcon, Eye, EyeOff } from 'lucide-react';
 import { api } from '../api';
 import { toast, Toaster } from 'react-hot-toast';
 import { useAuth } from '../context';
@@ -23,6 +23,9 @@ const SettingsPanel = () => {
   
   // Password state
   const [passwordForm, setPasswordForm] = useState({ old_password: '', new_password: '', confirm_password: '' });
+  const [showOldPass, setShowOldPass] = useState(false);
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
   
   // Payment settings state (for admin)
   const [payConfig, setPayConfig] = useState<any>({
@@ -253,26 +256,53 @@ const SettingsPanel = () => {
               
               <div>
                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Old Password</label>
-                <input required type="password" value={passwordForm.old_password}
-                  onChange={e => setPasswordForm({ ...passwordForm, old_password: e.target.value })}
-                  placeholder="••••••••"
-                  className="w-full p-4 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                <div className="relative">
+                  <input required type={showOldPass ? "text" : "password"} value={passwordForm.old_password}
+                    onChange={e => setPasswordForm({ ...passwordForm, old_password: e.target.value })}
+                    placeholder="••••••••"
+                    className="w-full p-4 pr-12 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                  <button
+                    type="button"
+                    onClick={() => setShowOldPass(!showOldPass)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
+                  >
+                    {showOldPass ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">New Password</label>
-                  <input required type="password" value={passwordForm.new_password}
-                    onChange={e => setPasswordForm({ ...passwordForm, new_password: e.target.value })}
-                    placeholder="••••••••"
-                    className="w-full p-4 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                  <div className="relative">
+                    <input required type={showNewPass ? "text" : "password"} value={passwordForm.new_password}
+                      onChange={e => setPasswordForm({ ...passwordForm, new_password: e.target.value })}
+                      placeholder="••••••••"
+                      className="w-full p-4 pr-12 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPass(!showNewPass)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
+                    >
+                      {showNewPass ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Confirm New Password</label>
-                  <input required type="password" value={passwordForm.confirm_password}
-                    onChange={e => setPasswordForm({ ...passwordForm, confirm_password: e.target.value })}
-                    placeholder="••••••••"
-                    className="w-full p-4 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                  <div className="relative">
+                    <input required type={showConfirmPass ? "text" : "password"} value={passwordForm.confirm_password}
+                      onChange={e => setPasswordForm({ ...passwordForm, confirm_password: e.target.value })}
+                      placeholder="••••••••"
+                      className="w-full p-4 pr-12 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPass(!showConfirmPass)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
+                    >
+                      {showConfirmPass ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
                 </div>
               </div>
 

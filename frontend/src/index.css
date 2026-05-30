@@ -4,17 +4,123 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
+    /* Base theme colors */
+    --background: 35 15% 98.5%;
+    --foreground: 35 10% 10%;
+    --primary: 95 28% 45%;
+    --primary-foreground: 35 15% 98%;
+
+    /* Warm Green (Emerald, Green, Blue) */
+    --emerald-50: 95 35% 96%;
+    --emerald-100: 95 30% 91%;
+    --emerald-200: 95 28% 81%;
+    --emerald-300: 95 26% 70%;
+    --emerald-400: 95 24% 58%;
+    --emerald-500: 95 28% 45%;
+    --emerald-600: 95 30% 38%;
+    --emerald-700: 95 32% 30%;
+    --emerald-800: 95 34% 23%;
+    --emerald-900: 95 36% 17%;
+    --emerald-950: 95 38% 11%;
+
+    /* Yellow-Green Accent (Teal, Indigo) */
+    --teal-50: 80 35% 96%;
+    --teal-100: 80 30% 91%;
+    --teal-200: 80 28% 81%;
+    --teal-300: 80 26% 70%;
+    --teal-400: 80 24% 58%;
+    --teal-500: 80 28% 45%;
+    --teal-600: 80 30% 38%;
+    --teal-700: 80 32% 30%;
+    --teal-800: 80 34% 23%;
+    --teal-900: 80 36% 17%;
+    --teal-950: 80 38% 11%;
+
+    /* Warm Yellow (Amber) */
+    --amber-50: 48 85% 96%;
+    --amber-100: 48 80% 91%;
+    --amber-200: 48 75% 81%;
+    --amber-300: 48 70% 70%;
+    --amber-400: 48 68% 58%;
+    --amber-500: 48 70% 46%;
+    --amber-600: 46 75% 38%;
+    --amber-700: 44 80% 30%;
+    --amber-800: 42 85% 23%;
+    --amber-900: 40 90% 17%;
+    --amber-950: 40 95% 11%;
+
+    /* Warm Slate (Neutrals) */
+    --slate-50: 35 15% 98%;
+    --slate-100: 35 10% 95%;
+    --slate-200: 35 8% 90%;
+    --slate-300: 35 6% 80%;
+    --slate-400: 35 5% 65%;
+    --slate-500: 35 4% 50%;
+    --slate-600: 35 5% 40%;
+    --slate-700: 35 6% 30%;
+    --slate-800: 35 8% 20%;
+    --slate-900: 35 10% 13%;
+    --slate-950: 35 12% 8%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    /* Base theme colors for dark mode */
+    --background: 35 10% 9%;
+    --foreground: 35 8% 92%;
+    --primary: 95 32% 52%;
+    --primary-foreground: 35 10% 9%;
+
+    /* Warm Green (Emerald, Green, Blue) */
+    --emerald-50: 95 50% 90%;
+    --emerald-100: 95 45% 82%;
+    --emerald-200: 95 40% 72%;
+    --emerald-300: 95 38% 62%;
+    --emerald-400: 95 35% 52%;
+    --emerald-500: 95 35% 45%;
+    --emerald-600: 95 32% 38%;
+    --emerald-700: 95 30% 30%;
+    --emerald-800: 95 28% 22%;
+    --emerald-900: 95 26% 15%;
+    --emerald-950: 95 24% 10%;
+
+    /* Yellow-Green Accent (Teal, Indigo) */
+    --teal-50: 80 50% 90%;
+    --teal-100: 80 45% 82%;
+    --teal-200: 80 40% 72%;
+    --teal-300: 80 38% 62%;
+    --teal-400: 80 35% 52%;
+    --teal-500: 80 35% 45%;
+    --teal-600: 80 32% 38%;
+    --teal-700: 80 30% 30%;
+    --teal-800: 80 28% 22%;
+    --teal-900: 80 26% 15%;
+    --teal-950: 80 24% 10%;
+
+    /* Warm Yellow (Amber) */
+    --amber-50: 48 85% 90%;
+    --amber-100: 48 80% 82%;
+    --amber-200: 48 75% 72%;
+    --amber-300: 48 70% 62%;
+    --amber-400: 48 65% 52%;
+    --amber-500: 48 65% 45%;
+    --amber-600: 46 70% 38%;
+    --amber-700: 44 75% 30%;
+    --amber-800: 42 80% 22%;
+    --amber-900: 40 85% 15%;
+    --amber-950: 40 90% 10%;
+
+    /* Warm Slate (Neutrals) */
+    --slate-50: 35 12% 95%;
+    --slate-100: 35 10% 88%;
+    --slate-200: 35 8% 78%;
+    --slate-300: 35 6% 65%;
+    --slate-400: 35 5% 52%;
+    --slate-500: 35 5% 40%;
+    --slate-600: 35 6% 30%;
+    --slate-700: 35 7% 22%;
+    --slate-800: 35 8% 14%;
+    --slate-900: 35 10% 10%;
+    --slate-950: 35 12% 7%;
   }
 }
 

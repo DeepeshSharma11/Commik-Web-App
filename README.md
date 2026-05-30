@@ -31,6 +31,8 @@ A production-grade multi-panel dairy management system for buffalo farmers in In
 - **Email Queue**: Async background worker with retry logic
 - **Fully Asynchronous**: High performance API via `asyncio` and thread-pool DB wrapping
 - **Dark / Light Mode**: Persisted across sessions
+- **Dynamic HSL Theme Engine**: Fully customizable light/dark color palette (warm green & warm yellow) configured globally via CSS variables in `frontend/src/index.css` and `frontend/tailwind.config.js` without modifying individual components.
+- **Password Visibility Toggles**: Interactive show/hide buttons (eye icons) for all password inputs to improve login, registration, and reset user experiences.
 - **Dynamic UI Engine**: Flexible `SectionLayout` for grids, sliders, and lists
 - **Role-Based Navigation**: Responsive layout with a sleek 5-tab fixed bottom navigation bar on mobile/tablet (Shop, Fresh Milk, Cart count badge, AI Chat, Menu drawer toggle) and dynamic top header on desktop.
 - **Multi-variant Components**: Adaptive cards that transition gracefully between grid and list modes

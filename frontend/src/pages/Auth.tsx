@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
-import { Sun, Moon, Sparkles, Tractor, ShieldCheck, Milk } from 'lucide-react';
+import { Sun, Moon, Sparkles, Tractor, ShieldCheck, Milk, Eye, EyeOff } from 'lucide-react';
 import { useAuth, useTheme } from '../context';
 import { api } from '../api';
 import { useNavigate } from 'react-router-dom';
@@ -15,6 +15,7 @@ const Auth = () => {
   const [authView, setAuthView] = useState<AuthView>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [resetEmail, setResetEmail] = useState('');
@@ -307,15 +308,26 @@ const Auth = () => {
                       </button>
                     )}
                   </div>
-                  <input 
-                    required 
-                    disabled={loading}
-                    type="password" 
-                    value={password} 
-                    onChange={e => setPassword(e.target.value)} 
-                    placeholder="••••••••"
-                    className="w-full p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 transition disabled:opacity-50" 
-                  />
+                  <div className="relative">
+                    <input 
+                      required 
+                      disabled={loading}
+                      type={showPassword ? "text" : "password"} 
+                      value={password} 
+                      onChange={e => setPassword(e.target.value)} 
+                      placeholder="••••••••"
+                      className="w-full p-4 pr-12 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 transition disabled:opacity-50" 
+                    />
+                    <button
+                      type="button"
+                      disabled={loading}
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
                 </div>
                 
                 <button type="submit" disabled={loading} className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 active:scale-98 text-white font-bold py-4 rounded-xl transition shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/30 flex items-center justify-center gap-2">
